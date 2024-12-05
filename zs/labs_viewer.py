@@ -92,6 +92,7 @@ class Wd:
         self._time(2)
         self._tree_k(3)
         self._tree_v(3)
+        self._tip(4)
         self.data = []
 
     # ===== 选择文件 =====
@@ -184,8 +185,11 @@ class Wd:
                 item_text = tv.item(iid, "values")
                 # print(item_text)
                 st.append(item_text[1])
-            self.rt.clipboard_clear()
-            self.rt.clipboard_append(' '.join(st))
+            st = ' '.join(st)
+            if st:
+                self.rt.clipboard_clear()
+                self.rt.clipboard_append(st)
+                self.tip(f'已复制到剪贴板：{st}')
 
         tv.bind('<ButtonRelease-1>', tv_click)  # 绑定单击离开事件
 
@@ -227,6 +231,14 @@ class Wd:
             unit = try_get(item, i_unit)
             values = (name, value, ref, unit)
             self.v_tv.insert("", "end", values=values)
+
+    def _tip(self, r):
+        self.tip_v = tk.StringVar(value='By Limour')
+        et = self.tip_et = tk.Entry(self.rt, textvariable=self.tip_v, background='#DDDDDD')
+        et.grid(row=r, column=1, columnspan=9, ipadx=340, padx=10, pady=10)
+
+    def tip(self, text):
+        self.tip_v.set(text)
 
 
 # ===== 初始化窗口 =====
