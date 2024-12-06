@@ -185,7 +185,7 @@ class Wd:
                 item_text = tv.item(iid, "values")
                 # print(item_text)
                 st.append(item_text[1])
-            st = ' '.join(st)
+            st = '\t'.join(st)
             if st:
                 self.rt.clipboard_clear()
                 self.rt.clipboard_append(st)
@@ -233,7 +233,7 @@ class Wd:
             self.v_tv.insert("", "end", values=values)
 
     def _tip(self, r):
-        self.tip_v = tk.StringVar(value='By Limour')
+        self.tip_v = tk.StringVar(value='Blog: https://hexo.limour.top/')
         et = self.tip_et = tk.Entry(self.rt, textvariable=self.tip_v, background='#DDDDDD')
         et.grid(row=r, column=1, columnspan=9, ipadx=340, padx=10, pady=10)
 
@@ -243,7 +243,7 @@ class Wd:
 
 # ===== 初始化窗口 =====
 Wd = Wd()
-Wd.rt.title("labs_viewer v0.1 ")
+Wd.rt.title("labs_viewer v0.2 by limour")
 Wd.rt.geometry('850x640+10+10')
 
 Wd.rt.mainloop()
