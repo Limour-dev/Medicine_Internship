@@ -97,6 +97,7 @@ class Wd:
         self.data = []
         self.search = None
         self._load_time()
+        self._detach(2)
 
     # ===== 选择文件 =====
     def _path(self, r):
@@ -149,6 +150,20 @@ class Wd:
         except FileNotFoundError:
             self.tip(f'载入默认时间配置未成功！')
 
+    # ===== 隐藏负值 =====
+    def _detach(self, r):
+        self.detach_set = set()
+
+        def _bt():
+            for iid in self.k_tv.get_children():
+                value: str = self.k_tv.item(iid, 'value')[0]
+                if value.startswith('-'):
+                    self.k_tv.delete(iid)
+                    self.detach_set.add(int(iid))
+
+        bt = self.detach_bt = tk.Button(self.rt, text='隐藏负值', command=_bt)
+        bt.grid(row=r, column=5, columnspan=1)
+
     # ===== 搜索功能 =====
     def _search(self, r):
         self.search_v = tk.StringVar(value='')
@@ -161,6 +176,8 @@ class Wd:
             for i in range(self.search, len(self.data)):
                 item = self.data[i]
                 if search in item['value']:
+                    if i in self.detach_set:
+                        continue
                     self.search = i + 1
                     if self.search >= len(self.data):
                         self.search = 0
@@ -275,6 +292,9 @@ class Wd:
                 days_difference = 0
             days_difference = f'{days_difference:.1f}天'
             self.k_tv.insert("", "end", iid=iid, values=(days_difference, tb[1]))
+        self.detach_set.clear()
+        if len(self.data) > 1:
+            self.k_tv.selection_set(0)
 
     # ===== 读取表格v =====
     def update_v(self, iid):
