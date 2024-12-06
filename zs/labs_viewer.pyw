@@ -96,6 +96,7 @@ class Wd:
         self._search(2)
         self.data = []
         self.search = None
+        self._load_time()
 
     # ===== 选择文件 =====
     def _path(self, r):
@@ -123,10 +124,30 @@ class Wd:
 
     # 读取数据
     def _load(self):
+        _dir, _file = os.path.split(self.path)
+        self.now = self.default_time.get(_file, self.now)
+        self.time.set(self.now.strftime("%Y/%m/%d %H:%M"))
         with open(self.path, 'r', encoding='utf-8') as f:
             self.data = json.load(f)[::-1]
         self.search = None
         self.tip(f'载入文件：{self.path}')
+
+    def _load_time(self):
+        self.default_time = {}
+        try:
+            with open('./data/time.txt', 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    item = line.split('\t')
+                    try:
+                        time = datetime.strptime(item[-1].strip(), "%Y/%m/%d %H:%M")
+                        self.default_time[item[0].strip() + '.json'] = time
+                    except ValueError:
+                        print('载入默认时间配置未成功', line)
+        except FileNotFoundError:
+            self.tip(f'载入默认时间配置未成功！')
 
     # ===== 搜索功能 =====
     def _search(self, r):
