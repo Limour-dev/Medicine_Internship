@@ -86,6 +86,55 @@ def sp_fix(_l, _n):
     return res
 
 
+def any_in(_l, _s):
+    return any((x in _s) for x in _l)
+
+
+def all_in(_l, _s):
+    return all((x in _s) for x in _l)
+
+
+def name_speculation(_s: str):
+    res = []
+    if all_in(('嗜酸性粒细胞百分比', '红细胞体积'), _s):
+        return '血常规'
+    if all_in(('尿', '管型'), _s):
+        return '尿常规'
+    if all_in(('细胞', '卵'), _s):
+        return '粪便检查'
+    if all_in(('因子', '白介素'), _s):
+        return '细胞因子'
+    if any_in(('心肌肌钙蛋白', '氨基末端利钠肽'), _s):
+        return '心脏标志物'
+    if all_in(('病毒', '抗体'), _s):
+        return '病毒抗体'
+
+    if all_in(('钠', '钾', '氯'), _s):
+        res.append('电解质')
+    if all_in(('胆红素', '白蛋白', '氨基转移酶'), _s):
+        res.append('肝功能')
+    if any_in(('肌酸激酶',), _s):
+        res.append('酶类')
+    if all_in(('肌酐', '尿素'), _s):
+        res.append('肾功能')
+    if '甲状腺' in _s:
+        res.append('甲状腺功能')
+
+    if 'D-二聚体' in _s:
+        res.append('D-二聚体')
+    if all_in(('凝血', '时间'), _s):
+        res.append('凝血功能')
+
+    if any_in(('葡萄糖', '糖化'), _s):
+        res.append('糖代谢')
+    if '脂蛋白' in _s:
+        res.append('血脂')
+    if '铁' in _s:
+        res.append('贫血')
+
+    return ','.join(res) if res else '其他'
+
+
 class Wd:
 
     def __init__(self):
@@ -151,21 +200,28 @@ class Wd:
                     except ValueError:
                         print('载入默认时间配置未成功', line)
         except FileNotFoundError:
-            self.tip(f'载入默认时间配置未成功！')
+            print('时间配置文件未找到！')
 
     # ===== 隐藏负值 =====
     def _detach(self, r):
         self.detach_set = set()
+        var = self.detach_var = tk.IntVar(value=0)
 
         def _bt():
+            if var.get():
+                self.update_k()
+                return
             for iid in self.k_tv.get_children():
                 value: str = self.k_tv.item(iid, 'value')[0]
-                if value.startswith('-'):
+                if 0 <= float(value.rstrip('天')) <= 14:
+                    pass
+                else:
                     self.k_tv.delete(iid)
                     self.detach_set.add(int(iid))
 
-        bt = self.detach_bt = tk.Button(self.rt, text='隐藏负值', command=_bt)
-        bt.grid(row=r, column=5, columnspan=1)
+        ct = self.detach_ct = tk.Checkbutton(self.rt, text='全部显示', command=_bt,
+                                             variable=var, onvalue=1, offvalue=0)
+        ct.grid(row=r, column=5, columnspan=1)
 
     # ===== 搜索功能 =====
     def _search(self, r):
@@ -293,17 +349,23 @@ class Wd:
         if not self.data:
             return
         self.k_tv.tv_clear()
+        self.detach_set.clear()
         for iid, item in enumerate(self.data):
             key: str = item['key']
             tb = key.split('\t')
             time = datetime.strptime(tb[0], '%Y-%m-%d %H:%M')
-            time_difference = time - self.now
-            days_difference = time_difference.total_seconds() / (24 * 3600)
-            if 0 > days_difference > -0.1:
-                days_difference = 0
-            days_difference = f'{days_difference:.1f}天'
-            self.k_tv.insert("", "end", iid=iid, values=(days_difference, tb[1]))
-        self.detach_set.clear()
+            days_d = (time - self.now).total_seconds() / (24 * 3600)
+            if 0 > days_d > -0.1:
+                days_d = 0
+            if not self.detach_var.get():
+                if not (0 <= days_d <= 14):
+                    self.detach_set.add(int(iid))
+                    continue
+            days_d = f'{days_d:.1f}天'
+            if '其他' in tb[1]:
+                tb[1] = tb[1].replace('其他', name_speculation(item['value']))
+            self.k_tv.insert("", "end", iid=iid, values=(days_d, tb[1]))
+
         if len(self.data) > 1:
             self.k_tv.selection_set(0)
 
@@ -341,7 +403,7 @@ class Wd:
 
 # ===== 初始化窗口 =====
 Wd = Wd()
-Wd.rt.title("labs_viewer v0.2 by limour")
+Wd.rt.title("labs_viewer v0.3 by limour")
 Wd.rt.geometry('850x640+10+10')
 
 Wd.rt.mainloop()
