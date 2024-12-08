@@ -28,19 +28,21 @@ class Treeview(ttk.Treeview):
         for item in x:
             self.delete(item)
 
-    def heading(self, col, text):
-        super().heading(col, text=text, command=lambda _col=col: self._tv_sort_column(_col, True))
+    def heading(self, col, text, key=sort_key, reverse=True):
+        super().heading(col, text=text,
+                        command=lambda _col=col, _key=key:
+                        self._tv_sort_column(_col, _key, reverse))
 
-    def _tv_sort_column(self, col, reverse):  # Treeview、列名、排列方式
+    def _tv_sort_column(self, col, key, reverse):  # Treeview、列名、排列方式
         l = [(self.set(k, col), k) for k in self.get_children('')]
         # print(self.get_children(''))
-        l.sort(reverse=reverse, key=sort_key)  # 排序方式
+        l.sort(reverse=reverse, key=key)  # 排序方式
         # rearrange items in sorted positions
         for index, (val, k) in enumerate(l):  # 根据排序后索引移动
             self.move(k, '', index)
             # print(k)
         # 重写标题，使之成为再点倒序的标题
-        super().heading(col, command=lambda: self._tv_sort_column(col, (not reverse)))
+        super().heading(col, command=lambda: self._tv_sort_column(col, key, (not reverse)))
 
 
 def re_find(_l, _r):
@@ -188,7 +190,7 @@ class Wd:
                 self.search = 0
                 self.tip(f'未找到项目：{search}')
 
-        def _bt():
+        def _bt(event=None):
             nonlocal last_search
             search = self.search_v.get()
 
@@ -204,6 +206,7 @@ class Wd:
                 self.search = 0
                 _search(search)
 
+        et.bind("<Return>", _bt)
         bt = self.search_bt = tk.Button(self.rt, text='搜索项目', command=_bt)
         bt.grid(row=r, column=4, columnspan=1)
 
@@ -237,7 +240,14 @@ class Wd:
         tv.grid(row=r, column=1, columnspan=3, padx=10)
         # 设置列标题
         tv.heading("time", text="时间")
-        tv.heading("name", text="项目")
+
+        def name_key(_s):
+            s = _s[0]
+            if ' - ' in s:
+                return ' - '.join(s.split(' - ')[::-1])
+            return s
+
+        tv.heading("name", text="项目", key=name_key)
         # 设置列宽
         tv.column("time", width=50)
         tv.column("name", width=200)
