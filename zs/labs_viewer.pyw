@@ -89,6 +89,7 @@ def sp_fix(_l, _n):
 class Wd:
 
     def __init__(self):
+        self.rp = os.getenv('LABS_VIEWER', '.')
         self.rt = tk.Tk()
         self._path(1)
         self._time(2)
@@ -105,7 +106,7 @@ class Wd:
     def _path(self, r):
         et = self.path_et = tk.Entry(self.rt, textvariable=tk.StringVar(value='请选择文件...'), state=tk.DISABLED)
         et.grid(row=r, column=1, columnspan=8, padx=10, ipadx=300)
-        self.path = './labs/'
+        self.path = f'{self.rp}/labs/'
 
         def _bt():
             _dir, _file = os.path.split(self.path)
@@ -138,7 +139,7 @@ class Wd:
     def _load_time(self):
         self.default_time = {}
         try:
-            with open('./data/time.txt', 'r', encoding='utf-8') as f:
+            with open(f'{self.rp}/data/time.txt', 'r', encoding='utf-8') as f:
                 for line in f:
                     line = line.strip()
                     if not line:
