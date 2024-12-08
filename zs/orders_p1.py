@@ -119,6 +119,7 @@ g2 = {
 }
 g3 = {
     '地高辛片', '盐酸多巴胺注射液', '去乙酰毛花苷注射液', '盐酸乌拉地尔注射液', '麝香保心丸', '临时起搏器应用',
+    '冻干重组人脑利钠肽', '沙库巴曲缬沙坦钠片',  # 有利尿作用，但先不放了
 }
 g4 = {
     '吡格列酮二甲双胍片', '德谷胰岛素注射液', '格列美脲片', '艾托格列净片',
@@ -147,7 +148,7 @@ g_cc = {
     '奥美沙坦酯氨氯地平片', '非洛地平缓释片',
 }
 g_di = {
-    '螺内酯片', '托拉塞米注射液', '冻干重组人脑利钠肽', '托拉塞米胶囊', '呋塞米注射液', '注射用呋塞米',
+    '螺内酯片', '托拉塞米注射液', '托拉塞米胶囊', '呋塞米注射液', '注射用呋塞米',
     '注射用托拉塞米', '托拉塞米片', '呋塞米片', '氯沙坦钾氢氯噻嗪片',
 }
 g_st = {
@@ -168,7 +169,7 @@ all_p = read('./data/', 'time', '.txt', lambda x: x.split('\t')[0])
 res = []
 for p in all_p:
     one_p = read('./orders/', p, '.txt', lambda x: x.split(',')[5])
-    one_at, one_bb, one_ac, one_ar, one_cc, one_di, one_st, one_am, one_ni = [0]*9
+    one_at, one_bb, one_ac, one_ar, one_cc, one_di, one_st, one_am, one_ni = [0] * 9
     for item in one_p:
         item: str = item.replace('）', ')')
         if item.startswith('(') and ')' in item:
@@ -211,7 +212,7 @@ for p in all_p:
             g_others.add(item)
     res.append('\t'.join(map(str, (
         p, one_at, one_bb, one_ac, one_ar, one_cc, one_di, one_st, one_am, one_ni),
-    )))
+                             )))
 
 res = '\n'.join(res)
 print(g_others)
