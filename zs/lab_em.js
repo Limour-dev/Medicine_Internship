@@ -1,5 +1,3 @@
-var oWindOpen = window.open;
-
 async function sleep(timeout) {
     await new Promise((s)=>setTimeout(s, timeout * 1000));
 }
@@ -26,26 +24,31 @@ async function isElLoaded(nW, sl) {
     return nW.document.querySelector(sl);
 }
 
+let tF = frames['NavigateFuncZone'];
+var oWindOpen = tF.window.open;
+
 var nWind;
 (async function(){
     var alldata = [];
-    for(let one_option of document.querySelector("#listBoxLabOrMed").options){
+    for(let one_option of tF.document.querySelector("#listBoxLabOrMed").options){
         let one_sig = createSignal();
         (async (f_one, f_sig)=>{
-            window.open = async function(){
+            tF.window.open = async function(){
                 let tmpWind = oWindOpen.apply(this, arguments);
                 console.log(f_one.value, tmpWind);
                 f_sig.trigger(tmpWind);
             }
-            PopupLabMedCheckEvent(f_one.value);
+            tF.PopupLabMedCheckEvent(f_one.value);
         })(one_option, one_sig);
         
         nWind = await one_sig.wait;
 
         let div = await isElLoaded(nWind, "#gridViewLabCheck");
-        var data = {key: one_option.innerText, value: div?.textContent};
+        var data = {key: one_option.innerText, value: div?.innerText};
         console.log(data);
         alldata.push(data);
+
+        nWind.close();
     }
     downloadFile(JSON.stringify(alldata), '急诊检验报告.json');
 })();
