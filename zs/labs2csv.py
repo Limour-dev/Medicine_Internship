@@ -59,15 +59,19 @@ def p_v(_v):
         res.append(values)
     return res
 
-path1 = r'E:\Cases\pericardial-mesothelioma'
+path1 = r'C:\Users\limou\Downloads\icis\cases'
 oCsv = 'ID,时间,来源,项目,结果,参考值,单位\n'
 for case in os.listdir(path1):
     path2 = os.path.join(path1, case)
     if not os.path.isdir(path2):
         continue
 
-    with open(os.path.join(path2, '急诊检验报告.json'), 'r', encoding='utf-8') as rf:
-        rd = json.load(rf)
+    path3 = os.path.join(path2, '急诊检验报告.json')
+    if os.path.exists(path3):
+        with open(path3, 'r', encoding='utf-8') as rf:
+            rd = json.load(rf)
+    else:
+        rd = []
     for item in rd:
         k = item['key']
         tb = re_em_t.findall(k)[0]
@@ -81,8 +85,12 @@ for case in os.listdir(path1):
             line += ','.join(x.replace(',', '，') for x in values)
             oCsv += line + '\n'
 
-    with open(os.path.join(path2, '住院检验报告.json'), 'r', encoding='utf-8') as rf:
-        rd = json.load(rf)
+    path3 = os.path.join(path2, '住院检验报告.json')
+    if os.path.exists(path3):
+        with open(path3, 'r', encoding='utf-8') as rf:
+            rd = json.load(rf)
+    else:
+        rd = []
     for item in rd:
         k = item['key']
         tb = k.split('\t')
