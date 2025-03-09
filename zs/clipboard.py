@@ -46,7 +46,7 @@ def set_clipboard_text(text):
         user32.EmptyClipboard()
 
         # 将文本转换为字节
-        text_bytes = text.encode('utf-8') + b'\0'  # 以 null 字节结束
+        text_bytes = text.encode('gbk') + b'\0'  # 以 null 字节结束
 
         # 分配内存
         h_global = kernel32.GlobalAlloc(GMEM_MOVEABLE, len(text_bytes))
