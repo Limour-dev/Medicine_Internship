@@ -24,6 +24,8 @@ kernel32.GlobalLock.argtypes = [wintypes.HGLOBAL]
 kernel32.GlobalUnlock.restype = wintypes.BOOL
 kernel32.GlobalUnlock.argtypes = [wintypes.HGLOBAL]
 
+user32.GetClipboardData.restype = wintypes.HANDLE
+user32.GetClipboardData.argtypes = [wintypes.UINT]
 
 # 打开剪贴板
 def open_clipboard():
@@ -74,9 +76,49 @@ def set_clipboard_text(text):
         close_clipboard()
 
 
+def get_clipboard_text():
+    """
+    从剪贴板获取文本内容
+    返回: 剪贴板中的文本，如果没有文本或发生错误则返回空字符串
+    """
+    try:
+        # 打开剪贴板
+        open_clipboard()
+
+        # 获取剪贴板数据句柄
+        h_data = user32.GetClipboardData(CF_TEXT)
+        if not h_data:
+            return ""
+
+        # 锁定内存并获取指针
+        pointer = kernel32.GlobalLock(h_data)
+        if not pointer:
+            return ""
+
+        try:
+            # 从指针读取字符串数据
+            text = ctypes.c_char_p(pointer).value
+            if text is None:
+                return ""
+            return text.decode('gbk', errors='replace')
+        finally:
+            # 解锁内存
+            kernel32.GlobalUnlock(h_data)
+    except Exception as e:
+        print(f"获取剪贴板文本时出错: {e}")
+        return ""
+    finally:
+        # 确保剪贴板被关闭
+        try:
+            close_clipboard()
+        except:
+            pass
+
+
 # 示例用法
 if __name__ == "__main__":
     try:
+        print(get_clipboard_text())
         set_clipboard_text("Hello, World!")
         print("Text has been copied to clipboard.")
     except Exception as e:
