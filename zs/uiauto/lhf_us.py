@@ -3,18 +3,19 @@ import time
 import pyperclip
 import re
 
-time.sleep(3)
-control = auto.GetFocusedControl()
-
-controlList = []
-while control:
-    controlList.insert(0, control)
-    control = control.GetParentControl()
-if len(controlList) == 1:
-    control = controlList[0]
-else:
-    control = controlList[1]
-print(control.Name)
+if True:
+    time.sleep(3)
+    control = auto.GetFocusedControl()
+    
+    controlList = []
+    while control:
+        controlList.insert(0, control)
+        control = control.GetParentControl()
+    if len(controlList) == 1:
+        control = controlList[0]
+    else:
+        control = controlList[1]
+    print(control.Name)
 
 def get_control_depth(_c, _depth):
     _t = [_c]
@@ -39,18 +40,20 @@ def get_value(_c):
 def clear_value(_v):
     return _v.replace('\t', ' ').replace('\n', '  ')
 
-a = get_control_depth(control, 10)
-b = get_control_depth(a[1], 1)
+if True:
+    a = get_control_depth(control, 10)
+    b = get_control_depth(a[1], 1)
 
-h = get_control_depth(control, 7)
-j = get_control_depth(h[1], 6)
+    h = get_control_depth(control, 7)
+    j = get_control_depth(h[1], 6)
 
-c = get_control_depth(b[0], 1)
-o = get_control_name(c, '垂直滚动条')
-o = get_control_name(o.GetChildren(), '向下翻页')
+    c = get_control_depth(b[0], 1)
+    o = get_control_name(c, '垂直滚动条')
+    o = get_control_name(o.GetChildren(), '向下翻页')
 
 res = []
-for line in c[720:]:
+# ========== loop start ==========
+for line in c[len(res)+2:]:
     name = line.Name
     print(name)
     items = []
@@ -59,7 +62,7 @@ for line in c[720:]:
         v = clear_value(v)
         items.append((x.Name, v))
         # print(items[-1])
-    if line.IsOffscreen:
+    while line.IsOffscreen:
         o.Click()
     if name != '首行':
         line.Click()
@@ -90,5 +93,5 @@ for line in c[720:]:
         else:
             print(name, '0 没有该项目, 跳过')
     res.append('\t'.join(x[1] for x in items))
-
+# ========== loop end ==========
 pyperclip.copy('\n'.join(res))
