@@ -59,50 +59,58 @@ def p_v(_v):
         res.append(values)
     return res
 
-path1 = r'C:\Users\limou\Downloads\icis\cases'
+path1 = r'C:\Users\limou\OneDrive\Documents\IMH_raw\STEMI'
 oCsv = 'ID,时间,来源,项目,结果,参考值,单位\n'
 for case in os.listdir(path1):
     path2 = os.path.join(path1, case)
     if not os.path.isdir(path2):
         continue
 
-    path3 = os.path.join(path2, '急诊检验报告.json')
-    if os.path.exists(path3):
+    path2s = os.listdir(path2)
+
+    for path3 in path2s:
+        if path3.startswith('急诊检验报告'):
+            path3 = os.path.join(path2, path3)
+        else:
+            continue
         with open(path3, 'r', encoding='utf-8') as rf:
             rd = json.load(rf)
-    else:
-        rd = []
-    for item in rd:
-        k = item['key']
-        tb = re_em_t.findall(k)[0]
-        i_time = datetime.strptime(tb[0], "%y.%m.%d")
-        v = item['value']
-        k:str = tb[1].replace(',', '，')
-        k = k.split('-', maxsplit=1)[0].strip()
+        for item in rd:
+            k = item['key']
+            tb = re_em_t.findall(k)[0]
+            i_time = datetime.strptime(tb[0], "%y.%m.%d")
+            v = item['value']
+            k:str = tb[1].replace(',', '，')
+            k = k.split('-', maxsplit=1)[0].strip()
 
-        for values in p_v(v):
-            line = f'{case},{i_time},{k},'
-            line += ','.join(x.replace(',', '，') for x in values)
-            oCsv += line + '\n'
+            for values in p_v(v):
+                line = f'{case},{i_time},{k},'
+                line += ','.join(x.replace(',', '，') for x in values)
+                oCsv += line + '\n'
 
-    path3 = os.path.join(path2, '住院检验报告.json')
-    if os.path.exists(path3):
+    for path3 in path2s:
+        if path3.startswith('住院检验报告'):
+            path3 = os.path.join(path2, path3)
+        else:
+            continue
         with open(path3, 'r', encoding='utf-8') as rf:
             rd = json.load(rf)
-    else:
-        rd = []
-    for item in rd:
-        k = item['key']
-        tb = k.split('\t')
-        i_time = datetime.strptime(tb[0], '%Y-%m-%d %H:%M')
-        v = item['value']
-        k = tb[1].replace(',', '，')
-        k = k.split('-', maxsplit=1)[0].strip()
-        for values in p_v(v):
-            line = f'{case},{i_time},{k},'
-            line += ','.join(x.replace(',', '，') for x in values)
-            oCsv += line + '\n'
+        for item in rd:
+            k = item['key']
+            tb = k.split('\t')
+            i_time = datetime.strptime(tb[0], '%Y-%m-%d %H:%M')
+            v = item['value']
+            k = tb[1].replace(',', '，')
+            k = k.split('-', maxsplit=1)[0].strip()
+            for values in p_v(v):
+                line = f'{case},{i_time},{k},'
+                line += ','.join(x.replace(',', '，') for x in values)
+                oCsv += line + '\n'
 
 oCsv = oCsv.replace(' ', ' ')
-with open(os.path.join(path1, '检验结果.csv'), 'w', encoding='gbk') as wf:
-    wf.write(oCsv)
+with open(os.path.join(path1, '检验结果.csv'), 'w', encoding='GB18030') as wf:
+    seen = set()
+    for line in oCsv.splitlines():
+        if line not in seen:
+            wf.write(line + '\n')
+            seen.add(line)
