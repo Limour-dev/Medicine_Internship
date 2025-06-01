@@ -34,12 +34,9 @@ system = '''
 + 无法明确，则给出 Others
 + HCM不区分梗阻型，都写HCM
 + 缺血性心肌病不区分陈旧性心梗，都写ICM
++ 非免疫相关性心肌炎和心肌炎后遗改变写MYO
++ 不用给出说明
 '''.strip()
-
-cc = get_clipboard_text()
-assert cc.count('\n') == 50
-cc = '\n'.join(f'{i:02}.{line}' for i,line in enumerate(cc.splitlines()))
-
 
 tp_u = '''
 00.（梗阻型）肥厚型心肌病，肥厚心肌内散在水肿及多发纤维灶形成；左心房增大，轻度二尖瓣、主动脉瓣反流；少量心包积液。
@@ -47,7 +44,7 @@ tp_u = '''
 02.心脏MRI检查未见明显异常。
 03.LAD供血区陈旧性心肌梗死并缺血性心肌病改变机会大，请结合临床并随访；轻度二尖瓣返流，心包少量积液。
 04.左房室扩大伴左室整体收缩活动减弱，左室壁增厚伴少许纤维化，心肌少许水肿，建议基因检测除外特殊类型心肌病；二尖瓣、三尖瓣轻度返流，心包少许积液。
-05.左室多壁段初始T1mapping值升高，心肌水肿待排，少量心包积液，建议1月后CMR复查。
+05.左室多壁段心肌水肿及延迟强化，符合心肌炎，请结合临床随访。
 06.左室壁肥厚（室间隔为著），左室多壁段初始T1值明显升高及延迟强化，可符合淀粉样变累及心脏，建议核医学检查。心包及两侧胸腔少量积液。
 '''.strip()
 
@@ -57,39 +54,47 @@ tp_a = '''
 02.Normal
 03.ICM
 04.DCM
-05.Others
+05.MYO
 06.CA
 '''.strip()
 
-data = {
-    'model': "gpt-4.1",
-    'messages': [
-        {'role': 'system', 'content': system},
-        {'role': 'user', 'content': tp_u},
-        {'role': 'assistant', 'content': tp_a},
-        {'role': 'user', 'content': cc}
-    ],
-    'stream': True
-}
+cc = get_clipboard_text().strip().splitlines()
+ccp = [cc[i:i+50] for i in range(0, len(cc), 50)]
+res = []
+for ccl in ccp:
+    cc = '\n'.join(f'{i:02}.{line}' for i,line in enumerate(ccl))
+    data = {
+        'model': "gpt-4.1",
+        'messages': [
+            {'role': 'system', 'content': system},
+            {'role': 'user', 'content': tp_u},
+            {'role': 'assistant', 'content': tp_a},
+            {'role': 'user', 'content': cc}
+        ],
+        'stream': True
+    }
 
-tmp = ''
-with httpx.stream("POST", url, headers=headers, json=data, timeout=_timeout) as r:
-    for line in r.iter_lines():
-        if line.endswith('[DONE]'):
-            continue
-        if line.startswith("data:"):
-            # print(True, line)
-            data = json.loads(line[5:])['choices']
-            if data:
+    tmp = ''
+    with httpx.stream("POST", url, headers=headers, json=data, timeout=_timeout) as r:
+        for line in r.iter_lines():
+            if line.endswith('[DONE]'):
+                continue
+            if line.startswith("data:"):
+                # print(True, line)
+                data = json.loads(line[5:])['choices']
+                if data:
 
-                data = data[0]
-                if 'delta' in data:
-                    data = data['delta']
-                    if data:
-                        tmp += data['content']
-                        print(data['content'], end='')
-        else:
-            pass
+                    data = data[0]
+                    if 'delta' in data:
+                        data = data['delta']
+                        if data:
+                            tmp += data['content']
+                            print(data['content'], end='')
+            else:
+                pass
 
+    tmp = tmp.strip()
+    assert tmp.count('\n') == len(ccl) - 1
+    res.append('\n'.join(line.strip()[3:] for line in tmp.splitlines()))
 
-set_clipboard_text('\n'.join(line.strip()[3:] for line in tmp.strip().splitlines()))
+set_clipboard_text('\n'.join(res))
