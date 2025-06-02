@@ -2,6 +2,7 @@ import uiautomation as auto
 import time
 import pyperclip
 import re
+re_html = re.compile(r'<[^>]+>')
 
 if True:
     time.sleep(3)
@@ -38,7 +39,9 @@ if True:
             return ''
 
     def clear_value(_v):
-        return _v.replace('\t', ' ').replace('\n', '  ').replace('\r', '  ')
+        _v = _v.replace('\t', ' ').replace('\n', '  ').replace('\r', '  ')
+        _v = re_html.sub('', _v)
+        return _v
 
     def get_lgvalue(_c):
         return _c.GetLegacyIAccessiblePattern().Value
