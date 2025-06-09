@@ -89,8 +89,8 @@ for i in range(len(res),len(zshs)):
         }
     d = httpx.post(url2, params=data2, data=data3, timeout=_t)
     if d.text.count('@') > 0:
-        if '核医学报告单' in d.text:
-            an = [l for l in d.text.split('|@|') if l.find('核医学报告单') >= 0]
+        if 'MRI报告单' in d.text:
+            an = [l for l in d.text.split('|@|') if l.find('MRI报告单') >= 0]
             an = [x.split('|')[-1] for x in an]
             an = '|@|'.join(an)
         else:
@@ -122,69 +122,17 @@ for i in range(len(res),len(zsans)):
     print(i)
     zsan = zsans[i].split('\t')
     cn = zsan[0]
-    res_i = []
-    for an in zsan[1].split('|@|'):
-        an = an.split('@')
-        data4 = {
-            "cureno": cn,
-            "applyno": an[0],
-            "reporttype": an[-1],
-        }
-        g = httpx.get(url4, params=data4)
-        g_s = BeautifulSoup(g, "html.parser")
-        zsid = g_s.select_one('#label7').getText()
-        jcsj = g_s.select_one('#label8').getText()
-        jcmc = g_s.select_one('#label22').getText().strip()
-        if not jcmc.startswith('PET/CT'):
-            print(jcmc)
-            continue
-        jl = g_s.select_one('#label11').getText()
-        res_i.append(f'{zsid}\t{jcsj}\t{jcmc}\t{clear_value(jl)}')
-    res.append(res_i)
+    an = zsan[1].split('|@|')[0].split('@')
+    data4 = {
+        "cureno": cn,
+        "applyno": an[0],
+        "reporttype": an[-1],
+    }
+    g = httpx.get(url4, params=data4)
+    g_s = BeautifulSoup(g, "html.parser")
+    zsid = g_s.select_one('#label7').getText()
+    res.append(zsid)
 
-import json
-with open('res_pet.json', 'w', encoding='utf-8') as wf:
-    json.dump(res, wf, ensure_ascii=False)
-
-with open('res_pet.json', 'r', encoding='utf-8') as rf:
-    res = json.load(rf)
-
-if True:
-    input('任意键粘贴数据...')
-    sl = pyperclip.paste().strip()
-    sl = sl.splitlines()[1:]
-
-from datetime import datetime
-def deltaT(et, ot_t):
-    et_t = datetime.strptime(et, r"%Y-%m-%d %H:%M:%S")
-    delta = ot_t - et_t
-    delta = round(delta.total_seconds() / 3600 / 24, 1)
-    return delta
-    
-
-rres = []
-for i in range(len(rres), len(res)):
-    l = res[i]
-    if len(l) <=0 :
-        rres.append('(null)\t(null)\t(null)\t(null)')
-        continue
-    if len(l) ==1:
-        rres.append(l[0])
-        continue
-    ot = sl[i].strip()
-    try:
-        ot_t = datetime.strptime(ot, r"%Y/%m/%d %H:%M")
-    except:
-        ot_t = datetime.strptime(ot, r"%Y/%m/%d")
-    l = [(deltaT(ll.split('\t')[1],ot_t),ll) for ll in l if not ll.endswith('\t')]
-    l_ = [ll for ll in l if ll[0] > 0]
-    if len(l_) > 0:
-        l = l_
-        l.sort(key=lambda x:x[0])
-    else:
-        l.sort(key=lambda x:abs(x[0]))
-    rres.append(l[0][-1])
-    
-pyperclip.copy('\n'.join(rres))
+pyperclip.copy('\n'.join(res))
 
 
