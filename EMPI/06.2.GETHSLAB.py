@@ -30,7 +30,11 @@ if True:
     lrs2 = pyperclip.paste().strip().splitlines()[1:]
     print(len(lrs2), lrs2[0], lrs2[-1], sep='\n')
 
-    m_l = min(len(zs), len(lrs1), len(lrs2))
+    m_l = max(len(lrs1), len(lrs2))
+    if len(lrs1) < m_l:
+        lrs1 += ['']*(m_l - len(lrs1))
+    if len(lrs2) < m_l:
+        lrs2 += ['']*(m_l - len(lrs2))
     zs2lb = {}
 
     def rm_rep(x):
@@ -66,7 +70,7 @@ for i in range(0,m_l):
     for o in v:
         pto = os.path.join(pt, '_'.join(o[2])).replace(' ','-')
         print(pto)
-        if os.path.exists(pto):
+        if os.path.exists(pto) or int(o[2][2][:4]) < 2010:
             print('skip')
             continue
         d = httpx.get(url, params={

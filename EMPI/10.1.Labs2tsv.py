@@ -11,6 +11,13 @@ if True:
                 return i
         return 0
 
+    if True:
+        if input('任意键粘贴ZSID...') != '.':
+            sl = pyperclip.paste().strip()
+            sl = sl.splitlines()[1:]
+        else:
+            sl = os.listdir(pt1)
+
     def try_get(_l, _i):
         for _ in range(-1, _i):
             try:
@@ -40,9 +47,10 @@ if True:
 
 oTsv = ['ID\t时间\t来源\t项目\t结果\t参考值\t单位']
 
-for case in os.listdir(pt1):
+for case in sl:
     path2 = os.path.join(pt1, case)
     if not os.path.isdir(path2):
+        print(case, 'missing')
         continue
     print(path2)
 
