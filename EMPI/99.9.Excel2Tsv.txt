@@ -1,0 +1,30 @@
+Alt + F11 
+插入 > 模块
+粘贴代码
+F5 运行代码
+
+Sub ExportSheetsToText()
+    Dim xWs As Worksheet
+    Dim xTextFile As String
+    Dim fDialog As FileDialog
+    Dim folderPath As String
+
+    ' 弹出文件夹选择框
+    Set fDialog = Application.FileDialog(msoFileDialogFolderPicker)
+    With fDialog
+        .Title = "请选择保存TXT文件的文件夹"
+        If .Show <> -1 Then
+            MsgBox "未选择文件夹，操作已取消。"
+            Exit Sub
+        End If
+        folderPath = .SelectedItems(1)
+    End With
+
+    For Each xWs In Application.ActiveWorkbook.Worksheets
+        xWs.Copy
+        xTextFile = folderPath & "\" & xWs.Name & ".txt"
+        Application.ActiveWorkbook.SaveAs Filename:=xTextFile, FileFormat:=xlText
+        Application.ActiveWorkbook.Saved = True
+        Application.ActiveWorkbook.Close
+    Next
+End Sub
