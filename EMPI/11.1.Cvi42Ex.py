@@ -33,6 +33,20 @@ if True:
     sl = pyperclip.paste()
     sl = sl.splitlines()
 
+def mergebp(bps):
+    res = []
+    li = -2
+    for i,v in bps:
+        if int(i) - li != 1:
+            res.append([float(v)])
+        else:
+            res[-1].append(float(v))
+        li = int(i)
+    for i in range(len(res)):
+        tmp = sum(res[i]) / len(res[i])
+        res[i] = f'{tmp:.3f}'
+    return res
+
 raise(BaseException("手动模式"))
 
 # nT1
@@ -194,6 +208,44 @@ if True:
             res.append('')
             continue
         res.append('\t'.join(nt1[skip]))
+
+    pyperclip.copy('\n'.join(res))
+
+# nT1 Blood Pool
+if True:
+    re_nt1bp = re.compile(r'^[\t ]*Regional Native T1 Slice (\d\d?).*(?:\r?\n.*){102}\s*Blood Pool\s+([^\s]+)', re.MULTILINE + re.IGNORECASE)
+    res = []
+    for zid in sl:
+        zid = zid.strip().upper()
+        if zid:
+            skip = 0
+            nt1 = mergebp(re_nt1bp.findall(cvi[zid]))
+        else:
+            skip += 1
+        print(zid, skip, len(nt1))
+        if skip >= len(nt1):
+            res.append('')
+            continue
+        res.append(nt1[skip])
+
+    pyperclip.copy('\n'.join(res))
+
+# pT1 Blood Pool
+if True:
+    re_pt1bp = re.compile(r'^[\t ]*Regional CA T1 Slice (\d\d?).*(?:\r?\n.*){102}\s*Blood Pool\s+([^\s]+)', re.MULTILINE + re.IGNORECASE)
+    res = []
+    for zid in sl:
+        zid = zid.strip().upper()
+        if zid:
+            skip = 0
+            nt1 = mergebp(re_pt1bp.findall(cvi[zid]))
+        else:
+            skip += 1
+        print(zid, skip, len(nt1))
+        if skip >= len(nt1):
+            res.append('')
+            continue
+        res.append(nt1[skip])
 
     pyperclip.copy('\n'.join(res))
 
