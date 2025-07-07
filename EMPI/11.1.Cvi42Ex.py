@@ -12,26 +12,24 @@ if True:
         zid = reg_zid.findall(one)[0][0].upper()
         with open(os.path.join(pt1, one), 'r', encoding='GB18030') as rf:
             data = rf.read()
+        dtn = reg_sdt.findall(data)[0]
+        dtn = datetime.strptime(dtn,'%m/%d/%Y')
         if zid in cvi:
-            dtn = reg_sdt.findall(data)[0]
-            dtl = reg_sdt.findall(cvi[zid])[0]
-            dtn = datetime.strptime(dtn,'%m/%d/%Y')
-            dtl = datetime.strptime(dtl,'%m/%d/%Y')
-            if dtn > dtl:
-                cvi[zid] = cvi[zid] + '\n' + data
-            else:
-                cvi[zid] = data + '\n' + cvi[zid]
+            cvi[zid].append((dtn, data))
+            cvi[zid].sort(key=lambda x:x[0])
         else:
-            cvi[zid] = data
+            cvi[zid] = [(dtn, data)]
 
     re_v = re.compile(r'\r?\n\t*((?:Segment\s)?\d\d?)\t([^\t]+)\t*', re.MULTILINE + re.IGNORECASE)
     re_v2 = re.compile(r'^[\t ]*([^\t]+)\t+([^\t]+)\t*', re.MULTILINE)
+    
 
 
 if True:
     input('任意键粘贴ZSID...')
     sl = pyperclip.paste()
     sl = sl.splitlines()
+    print(sl[0], sl[-1])
 
 def mergebp(bps):
     res = []
@@ -49,46 +47,6 @@ def mergebp(bps):
 
 raise(BaseException("手动模式"))
 
-# nT1
-if True:
-    re_nt1 = re.compile(r'^[\t ]*Regional\sNative\sT1\s\(AHA\sSegmentation\)\s*(?:\r?\n.*){2}((?:\r?\n.*){16})', re.MULTILINE)
-    res = []
-    for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            nt1 = re_nt1.findall(cvi[zid])
-        else:
-            skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
-            continue
-        ov = re_v.findall(nt1[skip])
-        res.append('\t'.join(x[1] for x in ov))
-
-    pyperclip.copy('\n'.join(res))
-
-# pT1
-if True:
-    re_pt1 = re.compile(r'^[\t ]*Regional\sCA\sT1\s\(AHA\sSegmentation\)\s*(?:\r?\n.*){2}((?:\r?\n.*){16})', re.MULTILINE)
-    res = []
-    for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            nt1 = re_pt1.findall(cvi[zid])
-        else:
-            skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
-            continue
-        ov = re_v.findall(nt1[skip])
-        res.append('\t'.join(x[1] for x in ov))
-
-    pyperclip.copy('\n'.join(res))
-
 # height weight HR
 if True:
     re_hwh = re.compile(r'^[\t ]*(1\d\d\.?\d*)\t(\d\d\d?\.?\d*)\t\t?(\d\d\d?)\t*$', re.MULTILINE)
@@ -97,15 +55,17 @@ if True:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_hwh.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_hwh.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        res.append('\t'.join(nt1[skip]))
-
+        res.append('\t'.join([dtn] + list(nt1[0])))
     pyperclip.copy('\n'.join(res))
 
 # LV
@@ -117,16 +77,19 @@ if True:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_lv.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_lv.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        ov = re_v2.findall(nt1[skip])
+        ov = re_v2.findall(nt1[0].split('\nClinical')[0])
         ov = {k.strip():v for k,v in ov}
-        res.append('\t'.join(ov[x] for x in oh))
+        res.append('\t'.join([dtn] + list(ov.get(x, 'NA') for x in oh)))
 
     pyperclip.copy('\n'.join(res))
 
@@ -139,19 +102,21 @@ if True:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_rv.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_rv.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        ov = re_v2.findall(nt1[skip])
+        ov = re_v2.findall(nt1[0].split('\nClinical')[0])
         ov = {k.strip():v for k,v in ov}
-        res.append('\t'.join(ov[x] for x in oh))
+        res.append('\t'.join([dtn] + list(ov.get(x, 'NA') for x in oh)))
 
     pyperclip.copy('\n'.join(res))
-
 
 # Myocardial Thickness
 if True:
@@ -161,15 +126,79 @@ if True:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_mt.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_mt.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        ov = re_v.findall(nt1[skip])
-        res.append('\t'.join(x[1] for x in ov))
+        ov = re_v.findall(nt1[0])
+        res.append('\t'.join([dtn] + list(x[1] for x in ov)))
+
+    pyperclip.copy('\n'.join(res))
+
+# Global Measurements Report	
+if True:
+    re_gmr = re.compile(r'^[\t ]*Global Measurements Report.*(?:\r?\n.*){6}((?:\r?\n.*){8,}?)\s*?Left Ventricle', re.MULTILINE + re.IGNORECASE)
+    res = []
+    for zid in sl:
+        zid = zid.strip().upper()
+        if zid:
+            skip = 0
+            data = cvi[zid]
+        else:
+            skip += 1
+        print(zid, skip)
+        nt1 = re_gmr.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
+            continue
+        ov = nt1[0].strip().splitlines()
+        ovs = ov[0:4]
+        ovl = ov[-4:]
+        tmp = []
+        # GRS
+        for line in ovs:
+            line = line.strip().split('\t')
+            tmp.append(line[2])
+        # GCS
+        for line in ovs:
+            line = line.strip().split('\t')
+            tmp.append(line[3])
+        # GLS
+        for line in ovl:
+            line = line.strip().split('\t')
+            tmp.append(line[4])
+        res.append('\t'.join([dtn] + tmp))
+
+    pyperclip.copy('\n'.join(res))
+
+# nT1
+if True:
+    re_nt1 = re.compile(r'^[\t ]*Regional\sNative\sT1\s\(AHA\sSegmentation\)\s*(?:\r?\n.*){2}((?:\r?\n.*){16})', re.MULTILINE)
+    res = []
+    for zid in sl:
+        zid = zid.strip().upper()
+        if zid:
+            skip = 0
+            data = cvi[zid]
+        else:
+            skip += 1
+        print(zid, skip)
+        nt1 = re_nt1.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
+            continue
+        ov = re_v.findall(nt1[0])
+        res.append('\t'.join([dtn] + list(x[1] for x in ov)))
 
     pyperclip.copy('\n'.join(res))
 
@@ -181,33 +210,40 @@ if True:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_gnt1.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_gnt1.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        res.append('\t'.join(nt1[skip]))
+        res.append('\t'.join([dtn] + list(nt1[0])))
 
     pyperclip.copy('\n'.join(res))
 
-# Global-mean	Global-SD pT1
+# pT1
 if True:
-    re_gpt1 = re.compile(r'^[\t ]*CA T1.*(?:\r?\n.*){10}\s*Global Myo T1 Across Slices\s*([^\t ]+)\s*±\s*([^\t ]+)', re.MULTILINE)
+    re_pt1 = re.compile(r'^[\t ]*Regional\sCA\sT1\s\(AHA\sSegmentation\)\s*(?:\r?\n.*){2}((?:\r?\n.*){16})', re.MULTILINE)
     res = []
     for zid in sl:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_gpt1.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_pt1.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        res.append('\t'.join(nt1[skip]))
+        ov = re_v.findall(nt1[0])
+        res.append('\t'.join([dtn] + list(x[1] for x in ov)))
 
     pyperclip.copy('\n'.join(res))
 
@@ -219,14 +255,18 @@ if True:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = mergebp(re_nt1bp.findall(cvi[zid]))
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_nt1bp.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        res.append(nt1[skip])
+        nt1 = mergebp(nt1)
+        res.append('\t'.join([dtn, nt1[0]]))
 
     pyperclip.copy('\n'.join(res))
 
@@ -238,14 +278,18 @@ if True:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = mergebp(re_pt1bp.findall(cvi[zid]))
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_pt1bp.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        res.append(nt1[skip])
+        nt1 = mergebp(nt1)
+        res.append('\t'.join([dtn, nt1[0]]))
 
     pyperclip.copy('\n'.join(res))
 
@@ -257,35 +301,51 @@ if True:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_nt2.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_nt2.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        ov = re_v.findall(nt1[skip])
-        res.append('\t'.join(x[1] for x in ov))
+        ov = re_v.findall(nt1[0])
+        res.append('\t'.join([dtn] + list(x[1] for x in ov)))
 
     pyperclip.copy('\n'.join(res))
 
-# Rest (MBF, ml/g/min)
+# Global-mean	Global-SD nT2
 if True:
-    re_qprm = re.compile(r'^[\t ]*\"Rest \(MBF, ml/g/min\)\"\s*(?:\r?\n.*){3}((?:\r?\n.*){16})', re.MULTILINE + re.IGNORECASE)
+    re_gnt2 = re.compile(r'^[\t ]*Global\sMyocardial\sT2\sOffset.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
+    re_gnt2fix = re.compile(r'^[\t ]*Global\sMyocardial\sT2.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_qprm.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_gnt2.findall(data[skip][1])
+        if not nt1:
+            nt1 = re_gnt2fix.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        ov = re_v.findall(nt1[skip])
-        res.append('\t'.join(x[1] for x in ov))
+        ov = re_v.findall(nt1[0])
+        ov = [float(x[1]) for x in ov if x[1].strip('-')]
+        m = sum(ov) / len(ov)
+        if len(ov) > 1:
+            variance = sum((x - m) ** 2 for x in ov) / (len(ov) - 1)
+            variance = variance ** 0.5
+            res.append('\t'.join([dtn, f'{m:.3f}', f'{variance:.3f}']))
+        else:
+            res.append('\t'.join([dtn, f'{m:.3f}', 'NA']))
 
     pyperclip.copy('\n'.join(res))
 
@@ -297,34 +357,40 @@ if True:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_qprmt.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_qprmt.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        res.append('\t'.join(nt1[skip]))
+        res.append('\t'.join([dtn] + list(nt1[0])))
 
     pyperclip.copy('\n'.join(res))
 
-# Rest rMBF 
+# Rest (MBF, ml/g/min)
 if True:
-    re_qprrm = re.compile(r'^[\t ]*Rest \(rMBF\)\s*(?:\r?\n.*){3}((?:\r?\n.*){16})', re.MULTILINE + re.IGNORECASE)
+    re_qprm = re.compile(r'^[\t ]*\"Rest \(MBF, ml/g/min\)\"\s*(?:\r?\n.*){3}((?:\r?\n.*){16})', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_qprrm.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_qprm.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        ov = re_v.findall(nt1[skip])
-        res.append('\t'.join(x[1] for x in ov))
+        ov = re_v.findall(nt1[0])
+        res.append('\t'.join([dtn] + list(x[1] for x in ov)))
 
     pyperclip.copy('\n'.join(res))
 
@@ -336,13 +402,62 @@ if True:
         zid = zid.strip().upper()
         if zid:
             skip = 0
-            nt1 = re_qprrmt.findall(cvi[zid])
+            data = cvi[zid]
         else:
             skip += 1
-        print(zid, skip, len(nt1))
-        if skip >= len(nt1):
-            res.append('')
+        print(zid, skip)
+        nt1 = re_qprrmt.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
             continue
-        res.append('\t'.join(nt1[skip]))
+        res.append('\t'.join([dtn] + list(nt1[0])))
+
+    pyperclip.copy('\n'.join(res))
+
+# Rest rMBF 
+if True:
+    re_qprrm = re.compile(r'^[\t ]*Rest \(rMBF\)\s*(?:\r?\n.*){3}((?:\r?\n.*){16})', re.MULTILINE + re.IGNORECASE)
+    res = []
+    for zid in sl:
+        zid = zid.strip().upper()
+        if zid:
+            skip = 0
+            data = cvi[zid]
+        else:
+            skip += 1
+        print(zid, skip)
+        nt1 = re_qprrm.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
+            continue
+        ov = re_v.findall(nt1[0])
+        res.append('\t'.join([dtn] + list(x[1] for x in ov)))
+
+    pyperclip.copy('\n'.join(res))
+
+
+# LGE
+if True:
+    re_lge = re.compile(r'^[\t ]*\"?((?:[1234],?)+)\"?\t*(?:\r?\n\t{5,})*\r?\n\t?Myocardial Volume:.*?(?:\r?\n.*){6}\r?\n\t?([^\t]+?g)', re.MULTILINE + re.IGNORECASE)
+    res = []
+    for zid in sl:
+        zid = zid.strip().upper()
+        if zid:
+            skip = 0
+            data = cvi[zid]
+        else:
+            skip += 1
+        print(zid, skip)
+        nt1 = re_lge.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
+            continue
+        res.append('\t'.join([dtn] + list(nt1[0])))
 
     pyperclip.copy('\n'.join(res))
