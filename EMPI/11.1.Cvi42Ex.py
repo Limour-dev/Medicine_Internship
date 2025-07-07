@@ -461,3 +461,30 @@ if True:
         res.append('\t'.join([dtn] + list(nt1[0])))
 
     pyperclip.copy('\n'.join(res))
+
+
+# Global-mean	Global-SD nT2 fix
+if True:
+    re_gnt2 = re.compile(r'^[\t ]*Global\sMyocardial\sT2\sOffset.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
+    re_gnt2fix = re.compile(r'^[\t ]*Global\sMyocardial\sT2.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
+    res = []
+    for zid in sl:
+        zid = zid.strip().upper()
+        if zid:
+            skip = 0
+            data = cvi[zid]
+        else:
+            skip += 1
+        print(zid, skip)
+        nt1 = re_gnt2.findall(data[skip][1])
+        if not nt1:
+            nt1 = re_gnt2fix.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
+            continue
+        ov = re_v.findall(nt1[0])
+        res.append('\t'.join([dtn] + [x[1] for x in ov]))
+
+    pyperclip.copy('\n'.join(res))
