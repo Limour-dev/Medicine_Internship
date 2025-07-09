@@ -4,7 +4,7 @@ if True:
     from datetime import datetime
     pt1 = input('输入CVI_TSV路径:')
 
-    reg_zid = re.compile(r'([Zz][Ss]\d+?)([（(].+?[）)])?\s*\.txt')
+    reg_zid = re.compile(r'([Zz]?[Ss]?\d+?)([（(].+?[）)])?\s*\.txt')
     reg_sdt = re.compile(r'^[\t ]*Study Date\t(\d+/\d+/\d+)', re.MULTILINE)
 
     cvi = {}
