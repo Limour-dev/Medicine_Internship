@@ -71,7 +71,7 @@ if True:
 # LV
 if True:
     re_lv = re.compile(r'^[\t ]*(?:(?:LV)|(?:Clinical Results LV)).*(?:\r?\n.*){5}(\r?\nEDV.*(?:\r?\n.*){20})', re.MULTILINE)
-    oh = ['EF', 'EDV/H', 'ESV/H', 'SV/H', 'CI']
+    oh = ['EF', 'EDV/BSA', 'ESV/BSA', 'SV/BSA', 'CI']
     res = []
     for zid in sl:
         zid = zid.strip().upper()
@@ -96,7 +96,7 @@ if True:
 # RV
 if True:
     re_rv = re.compile(r'^[\t ]*(?:(?:RV)|(?:Clinical Results RV)).*(?:\r?\n.*){4}(\r?\nEDV.*(?:\r?\n.*){14})', re.MULTILINE)
-    oh = ['EF', 'EDV/H', 'ESV/H', 'SV/H', 'CI']
+    oh = ['EF', 'EDV/BSA', 'ESV/BSA', 'SV/BSA', 'CI']
     res = []
     for zid in sl:
         zid = zid.strip().upper()
@@ -293,6 +293,29 @@ if True:
 
     pyperclip.copy('\n'.join(res))
 
+# ECV
+if True:
+    re_pt1 = re.compile(r'^[\t ]*Regional\sECV\s\(AHA\sSegmentation\)\s*(?:\r?\n.*){2}((?:\r?\n.*){16})', re.MULTILINE)
+    res = []
+    for zid in sl:
+        zid = zid.strip().upper()
+        if zid:
+            skip = 0
+            data = cvi[zid]
+        else:
+            skip += 1
+        print(zid, skip)
+        nt1 = re_pt1.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
+            continue
+        ov = re_v.findall(nt1[0])
+        res.append('\t'.join([dtn] + list(x[1] for x in ov)))
+
+    pyperclip.copy('\n'.join(res))
+
 # nT2
 if True:
     re_nt2 = re.compile(r'^[\t ]*Regional\sT2\s\(AHA\sSegmentation\)\s*(?:\r?\n.*){2}((?:\r?\n.*){16})', re.MULTILINE + re.IGNORECASE)
@@ -442,7 +465,7 @@ if True:
 
 # LGE
 if True:
-    re_lge = re.compile(r'^[\t ]*\"?((?:[1234],?)+)\"?\t*(?:\r?\n\t{5,})*\r?\n\t?Myocardial Volume:.*?(?:\r?\n.*){6}\r?\n\t?([^\t]+?g)', re.MULTILINE + re.IGNORECASE)
+    re_lge = re.compile(r'^[\t ]*\"?((?:[1234] *,? *)+)\"?\t*(?:\r?\n\t{5,})*\r?\n\t?Myocardial Volume:.*?(?:\r?\n.*){6}\r?\n\t?([^\t]+?)g', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
         zid = zid.strip().upper()
@@ -459,6 +482,28 @@ if True:
             res.append(dtn)
             continue
         res.append('\t'.join([dtn] + list(nt1[0])))
+
+    pyperclip.copy('\n'.join(res))
+
+# LGE2
+if True:
+    re_lge = re.compile(r'Myocardial Volume:.*?(?:\r?\n.*){6}\r?\n\t?([^\t]+?)g', re.MULTILINE + re.IGNORECASE)
+    res = []
+    for zid in sl:
+        zid = zid.strip().upper()
+        if zid:
+            skip = 0
+            data = cvi[zid]
+        else:
+            skip += 1
+        print(zid, skip)
+        nt1 = re_lge.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
+            continue
+        res.append('\t'.join([dtn] + list(nt1)))
 
     pyperclip.copy('\n'.join(res))
 
