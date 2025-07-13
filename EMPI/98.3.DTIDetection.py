@@ -31,11 +31,11 @@ if True:
     for b in zid.keys():
         zid[b].sort(key=lambda x:x[0])
 
-    if True:
-        input('任意键粘贴ZSID和时间...')
-        sl = pyperclip.paste()
-        sl = sl.splitlines()
-        print(sl[0], sl[-1])
+if True:
+    input('任意键粘贴ZSID和时间...')
+    sl = pyperclip.paste()
+    sl = sl.splitlines()
+    print(sl[0], sl[-1])
 
 if True:
     out = input('输入out文件夹路径:')
@@ -72,7 +72,7 @@ if True:
         tmp.sort(key = lambda x:x[0])
         tmp = tmp[0]
         if tmp[0].total_seconds() > 3600*24*5:
-            res.append('NA\tNA')
+            res.append(datetime.strftime(tmp[1],'%Y/%m/%d') + '\tNA')
             continue
         res.append(datetime.strftime(tmp[1],'%Y/%m/%d') + '\t1')
     pyperclip.copy('\n'.join(res))
