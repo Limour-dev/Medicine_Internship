@@ -4,38 +4,52 @@ if True:
     from datetime import datetime
     pts = input('输入源文件夹路径:')
 
-def getmt(fp):
-    mtime = os.path.getmtime(fp)
-    return datetime.fromtimestamp(mtime)
+    def getmt(fp):
+        mtime = os.path.getmtime(fp)
+        return datetime.fromtimestamp(mtime)
 
-zid = {}
+    zid = {}
 
-for a in os.listdir(pts):
-    pth1 = os.path.join(pts,a)
-    b = a.split('_')
-    z = b[-1].strip().upper()
-    t = b[0]
-    if len(t) == 6:
-        t = '20' + t
-        pth2 = os.path.join(pts, '20' + a)
-        os.rename(pth1, pth2)
-        pth1 = pth2
-    t = datetime.strptime(t, '%Y%m%d')
-    if z in zid:
-        print(b)
-        zid[z].append([t,pth1])
-    else:
-        zid[z] = [[t,pth1]]
+    for a in os.listdir(pts):
+        pth1 = os.path.join(pts,a)
+        b = a.split('_')
+        z = b[-1].strip().upper()
+        t = b[0]
+        if len(t) == 6:
+            t = '20' + t
+            pth2 = os.path.join(pts, '20' + a)
+            os.rename(pth1, pth2)
+            pth1 = pth2
+        t = datetime.strptime(t, '%Y%m%d')
+        if z in zid:
+            print(b)
+            zid[z].append([t,pth1])
+        else:
+            zid[z] = [[t,pth1]]
 
 
-for b in zid.keys():
-    zid[b].sort(key=lambda x:x[0])
+    for b in zid.keys():
+        zid[b].sort(key=lambda x:x[0])
+
+    if True:
+        input('任意键粘贴ZSID和时间...')
+        sl = pyperclip.paste()
+        sl = sl.splitlines()
+        print(sl[0], sl[-1])
 
 if True:
-    input('任意键粘贴ZSID和时间...')
-    sl = pyperclip.paste()
-    sl = sl.splitlines()
-    print(sl[0], sl[-1])
+    out = input('输入out文件夹路径:')
+    icis = set(x.split('\t')[0].strip().upper() for x in sl)
+    icis.remove('')
+
+for z, pths in zid.items():
+    if z in icis:
+        continue
+    for t,pth in pths:
+        pth1 = os.path.split(pth)[-1]
+        pth1 = os.path.join(out, pth1)
+        print(pth, pth1)
+        os.rename(pth, pth1)
 
 # DTI
 if True:
