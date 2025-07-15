@@ -101,6 +101,8 @@ if True:
                 line.append(o[1])
             else:
                 line.append(o[3])
+                if o[0] in {'HA'}:
+                    line.append(str(float(o[5])-float(o[4])))
         return line
     res = []
     for zsid in sl:
