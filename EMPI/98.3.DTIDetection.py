@@ -87,6 +87,24 @@ for pths in zid.values():
             os.unlink(pth)
 
 
+# re_draw
+pth_rep = input('输入重画文件夹路径:')
+for pths in zid.values():
+    for t,pth in pths:
+        pth2 = os.path.join(pth_rep, os.path.split(pth)[-1])
+        if not os.path.exists(pth):
+            continue
+        pth1 = os.path.join(pth, 'Python_post_processing', 'results')
+        pth2 = os.path.join(pth2, 'Python_post_processing', 'session')
+        # print(pth1, pth2)
+        tmp = os.listdir(pth1)
+        tmp = [f'manual_lv_segmentation_slice_0{x[23:-4]}.npz' for x in tmp if x.startswith('results_montage__slice')]
+        for x in tmp:
+            pth3 = os.path.join(pth2, x)
+            if os.path.exists(pth3):
+                print(pth3)
+                os.unlink(pth3)
+
 # DTI Ex
 if True:
     def dti_ex_o(pth1):
