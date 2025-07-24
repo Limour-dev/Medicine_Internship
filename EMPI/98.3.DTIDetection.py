@@ -161,3 +161,43 @@ if True:
         gline.extend(dti_ex_o(pth))
         res.append('\t'.join(gline))
     pyperclip.copy('\n'.join(res))
+
+
+# DTI n_images
+if True:
+    import numpy as np
+    import pickle
+    
+    def dti_ex_o(pth1):
+        with open(pth1, "rb") as f:
+            data = pickle.load(f)
+        line = [str(data['info']['n_images_rejected']), str(data['info']['n_images'])]
+        return line
+    
+    res = []
+    for zsid in sl:
+        tmp = zsid.split('\t')
+        zsid = tmp[0].strip().upper()
+        sst = datetime.strptime(tmp[-1], '%Y/%m/%d')
+        if zsid:
+            if zsid in zid:
+                data = zid[zsid]
+            else:
+                res.append('NA\tNA')
+                continue
+        else:
+            if res[-1].startswith('NA'):
+                res.append('NA\tNA')
+                continue
+        tmp = [(abs(sst - x[0]), x[0], x[1]) for x in data]
+        tmp.sort(key = lambda x:x[0])
+        tmp = tmp[0]
+        if tmp[0].total_seconds() > 3600*24*5:
+            res.append(datetime.strftime(tmp[1],'%Y/%m/%d') + '\tNA')
+            continue
+        gline = [datetime.strftime(tmp[1],'%Y/%m/%d')]
+        pth = os.path.join(tmp[-1], 'Python_post_processing', 'results', 'numpy results', 'dti_maps.pkl')
+        print(pth)
+        gline.extend(dti_ex_o(pth))
+        res.append('\t'.join(gline))
+    pyperclip.copy('\n'.join(res))
