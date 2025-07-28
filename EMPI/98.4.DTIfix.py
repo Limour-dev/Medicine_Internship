@@ -6,7 +6,10 @@ pth = r'D:\DTI\results\ICIs'
 for pth1 in os.listdir(pth):
     pth1 = os.path.join(pth, pth1, 'Python_post_processing')
     pth_rm_pre = os.path.join(pth1, 'session', 'image_manual_removal_pre.zip')
+    pth_rm_post = os.path.join(pth1, 'session', 'image_manual_removal_post.zip')
     rm_pre = pd.read_pickle(pth_rm_pre)
+    rm_post = pd.read_pickle(pth_rm_post)
+    rm_pre = rm_pre.loc[rm_post.index]
     pth_rm_pre = os.path.join(pth1, 'results', 'numpy results', 'image_manual_removal_pre.csv')
     pth_h5 = os.path.join(pth1, 'results', 'data', 'DTI_maps.h5')
     with h5py.File(pth_h5, 'r') as rf:
@@ -80,5 +83,7 @@ for pth1 in os.listdir(pth):
             snr = ['#', '#', '#', '#', '#', '#']
         print(snr)
     snr.append(sum(rm_pre['to_be_removed']))
+    snr.append(sum(rm_post['to_be_removed']))
+    snr.append(len(rm_post['to_be_removed']))
     with open(pth_rm_pre, 'w') as wf:
         wf.write('\t'.join(str(x) for x in snr))
