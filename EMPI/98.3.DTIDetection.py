@@ -218,16 +218,6 @@ if True:
 
 # DTI n_images
 if True:
-    # reg_rm_pre = re.compile(r'Number of images rejected after pre:\s*(\d+)\s*$', re.MULTILINE)
-    import numpy as np
-    import pickle
-    
-    def dti_ex_o(pth1):
-        with open(pth1, "rb") as f:
-            data = pickle.load(f)
-        line = [str(data['info']['n_images_rejected']), str(data['info']['n_images'])]
-        return line
-    
     res = []
     for zsid in sl:
         tmp = zsid.split('\t')
@@ -253,8 +243,5 @@ if True:
         pth = os.path.join(tmp[-1], 'Python_post_processing', 'results', 'numpy results', 'image_manual_removal_pre.csv')
         with open(pth, 'r', encoding='utf-8') as rf:
             gline.extend(rf.read().strip().split('\t'))
-        pth = os.path.join(tmp[-1], 'Python_post_processing', 'results', 'numpy results', 'dti_maps.pkl')
-        print(pth)
-        gline.extend(dti_ex_o(pth))
         res.append('\t'.join(gline))
     pyperclip.copy('\n'.join(res))
