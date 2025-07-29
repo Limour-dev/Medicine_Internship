@@ -68,7 +68,10 @@ if True:
 # f.Click(simulateMove=False)
 # m.Click(simulateMove=False)
 
+
+
 if True:
+    import keyboard
     a = get_control_depth(control, 2)
     b = get_control_name(a, 'DICOM节点导入')
     b = get_control_id(b, 'PACSExplorerWindow')
@@ -84,6 +87,12 @@ for i in range(i, len(sl)):
     zid = sl[i]
     print(i, zid)
     e.GetValuePattern().SetValue(zid)
+    # print(get_value(e))
+    while f.IsEnabled == 0:
+        f.Click(simulateMove=False)
+        keyboard.press_and_release('esc')
+        time.sleep(1)
+        e.GetValuePattern().SetValue(zid)
     f.Click(simulateMove=False)
     h = get_control_name(g, 'UIH.Mcsf.Archiving.StudyViewModel')
     if h:
@@ -93,3 +102,4 @@ for i in range(i, len(sl)):
         if not nn: break
         n.Click(simulateMove=False)
         m.Click(simulateMove=False)
+        
