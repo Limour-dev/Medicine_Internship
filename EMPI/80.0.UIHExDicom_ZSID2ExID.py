@@ -38,6 +38,17 @@ if True:
                 print(_c.Name, _c.AutomationId)
                 return _c
 
+    def get_control_name_s(_cs, _n, offset=0):
+        if not (type(_cs) is list):
+            _cs = _cs.GetChildren()
+        res = []
+        for i,_c in enumerate(_cs):
+            if _c.Name == _n:
+                _c = _cs[i+offset]
+                print(_c.Name, _c.AutomationId)
+                res.append(_c)
+        return res
+
     def get_control_id(_cs, _id, offset=0):
         if not (type(_cs) is list):
             _cs = _cs.GetChildren()
@@ -62,6 +73,7 @@ if True:
     sl = pyperclip.paste().strip()
     sl = sl.splitlines()
     print(sl[0], '\n', sl[-1])
+    sl = list(set(sl))
     auto.SetGlobalSearchTimeout(120)
 
 # e.GetValuePattern().SetValue('limour')
@@ -81,27 +93,26 @@ if True:
     f = get_control_name(c, '查询', 0)
     g = get_control_id(c, 'studyList_ListView', 0)
     m = get_control_name(c, '导入检查')
+    x = get_control_name(d, '患者编号', 1)
 
 i = 0
+res = []
 for i in range(i, len(sl)):
     zid = sl[i]
     print(i, zid)
-    if not zid.strip():
-        continue
-    e.GetValuePattern().SetValue(zid)
+    x.GetValuePattern().SetValue(zid)
     # print(get_value(e))
     while f.IsEnabled == 0:
         f.Click(simulateMove=False)
         keyboard.press_and_release('esc')
         time.sleep(1)
-        e.GetValuePattern().SetValue(zid)
+        x.GetValuePattern().SetValue(zid)
     f.Click(simulateMove=False)
-    h = get_control_name(g, 'UIH.Mcsf.Archiving.StudyViewModel')
-    if h:
-        n = get_control_depth(h, 1)[2]
-        nn = get_value(n)
-        print(nn)
-        if not nn: break
-        n.Click(simulateMove=False)
-        m.Click(simulateMove=False)
-        
+    h = get_control_name_s(g, 'UIH.Mcsf.Archiving.StudyViewModel')
+    for oh in  h:
+        oh = get_control_depth(oh, 1)
+        nn = oh[2].GetChildren()[0].Name
+        tt = oh[7].GetChildren()[0].Name
+        exid = oh[9].GetChildren()[0].Name
+        res.append(f'{zid}\t{nn}\t{tt}\t{exid}')
+pyperclip.copy('\n'.join(res))
