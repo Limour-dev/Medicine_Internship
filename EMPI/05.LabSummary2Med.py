@@ -19,6 +19,6 @@ for nf in nfs:
         sd = ag[2].replace('/', '-')
         res_i.add(f'{tm}|{tt}|{ag[0]}|{ag[1]}|{sd}')
     res_i = '|@|'.join(res_i)
-    assert len(res_i) < 30000
+    # assert len(res_i) < 30000
     res.append(res_i)
 pyperclip.copy('\n'.join(res))

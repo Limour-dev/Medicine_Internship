@@ -18,6 +18,7 @@ pt1 = input('输入ZSIDCNO路径:')
 res = {}
 
 reg_zsid = re.compile(r'ZS\d{5,}', re.IGNORECASE)
+reg_phn = re.compile(r'^\s*1[3456789]\d{9}\s*$')
 
 for one in os.listdir(pt1):
     header = ''
@@ -49,7 +50,7 @@ for one in os.listdir(pt1):
 
 res_l = []
 for k, v in res.items():
-    v = [x for x in v if len(x) > 3]
+    v = [x for x in v if ((len(x) > 3) and not reg_phn.search(x))]
     if not v:
         continue
     res_l.append(f'{k}\t{v[0]}')
