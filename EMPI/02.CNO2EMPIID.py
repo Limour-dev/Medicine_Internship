@@ -42,8 +42,16 @@ try:
         }
         a = httpx.post(url1, data=data1, headers=headers)
         a_s = BeautifulSoup(a, "html.parser")
-        b = a_s.select_one('body > form script').getText()
-        b_l = re_b.findall(b)[0]
+        try:
+            b = a_s.select_one('body > form script').getText()
+        except AttributeError:
+            res.append('NA')
+            continue
+        try:
+            b_l = re_b.findall(b)[0]
+        except IndexError:
+            res.append('NA')
+            continue
         if True:
             h_vs = a_s.select_one('#__VIEWSTATE').get_attribute_list('value')
             h_vsr = a_s.select_one('#__VIEWSTATEGENERATOR').get_attribute_list('value')

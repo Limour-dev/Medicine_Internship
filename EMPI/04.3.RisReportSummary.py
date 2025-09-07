@@ -35,7 +35,10 @@ try:
             lbs = lb_s.select("#tblRisContent > tbody > tr")
             for opc in lbs:
                 op = opc.getText().strip()
-                op = re_op.findall(op)[0]
+                try:
+                    op = re_op.findall(op)[0]
+                except:
+                    continue
                 opu = opc.select_one('td:nth-child(3) > a')
                 opu = opu.get_attribute_list('href')[0]
                 op = '|'.join(op) + '|' + unquote(opu)

@@ -60,7 +60,8 @@ for i in range(m_l):
 if not os.path.exists('GETHSLAB'):
     os.mkdir('GETHSLAB')
 
-for i in range(0,m_l):
+i=0
+for i in range(i,m_l):
     print('i', i)
     k = zs[i]
     v = zs2lb[zs[i]]
@@ -80,8 +81,11 @@ for i in range(0,m_l):
             })
         d_s = BeautifulSoup(d, "html.parser")
         div = d_s.select_one("#gridViewLabCheck")
-        
-        tr = div.select('tr')
+
+        try:
+            tr = div.select('tr')
+        except AttributeError:
+            continue
         tb = ['\t'.join(x.getText() for x in tr[0].select('th'))]
         for tro in tr[1:]:
             td = '\t'.join(clear_value(x.getText()) for x in tro.select('td'))
