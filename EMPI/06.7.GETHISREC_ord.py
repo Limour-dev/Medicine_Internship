@@ -19,42 +19,37 @@ if True:
     input('任意键粘贴ZSID...')
     zs = pyperclip.paste().strip().splitlines()[1:]
     print(len(zs), zs[0], zs[-1], sep='\n')
-    
+
     input('任意键粘贴住院记录...')
     lrs1 = pyperclip.paste().strip().splitlines()[1:]
     print(len(lrs1), lrs1[0], lrs1[-1], sep='\n')
-    url = 'http://10.16.90.35:8000/api/record/v1/emr_view_doc_cureno'
-
-    ast = input('输入access_token...').strip()
-
-    headers = { "access_token": ast }
+    url = 'http://v-emrservice01.zshis.com.sh/EmrPortal_new/Admission/QueryOrders.aspx'
 
 if not os.path.exists('GETHSREC'):
     os.mkdir('GETHSREC')
 
-for i in range(min(len(zs),len(lrs1))):
-    o_zs = zs[i].strip()
+for i,o_zs in enumerate(zs):
+    o_zs = o_zs.strip()
+    
     pt = os.path.join('GETHSREC', o_zs)
     if not os.path.exists(pt):
         os.mkdir(pt)
-    pt = os.path.join(pt, 'ipd')
+    pt = os.path.join(pt, 'ord')
     if not os.path.exists(pt):
         os.mkdir(pt)
     for cun in set(lrs1[i].split('|@|')):
         cun = cun.strip()
         if not cun:
             continue
-        cun = cun.split('|')[-1]
-        pto = os.path.join(pt,cun + '.json')
+        cun = cun.split('|')
+        pto = os.path.join(pt, cun[-1] + '.html')
         print(pto)
         if os.path.exists(pto):
             print('skip')
             continue
-        a = httpx.get(
-                url, headers=headers,
-                params={
-                    "cureNo": cun,
-                }, timeout = _t
-            )
+        d = httpx.get(url, params={
+            "cureno": cun[-1],
+            "DomainID": cun[0]
+            }, timeout = _t)
         with open(pto, 'w', encoding='utf-8') as wf:
-            wf.write(a.text)
+            wf.write(d.text)
