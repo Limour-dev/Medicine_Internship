@@ -9,3 +9,5 @@ conda create -n pyinstaller conda-forge::pyinstaller
 conda activate pyinstaller 
 pyinstaller --upx-dir "D:\D\upx" labs_viewer.pyw --clean
 ```
+## 文件传递
++ https://github.com/Limour-dev/qrjs
