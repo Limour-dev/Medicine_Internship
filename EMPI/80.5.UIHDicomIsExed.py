@@ -58,59 +58,25 @@ if True:
             return ''
 
 if True:
-    input('任意键粘贴ZSID...')
+    input('任意键粘贴登记号...')
     sl = pyperclip.paste().strip()
-    sl = sl.splitlines()
+    sl = sl.splitlines()[1:]
     print(sl[0], '\n', sl[-1])
-    auto.SetGlobalSearchTimeout(120)
-
-# e.GetValuePattern().SetValue('limour')
-# f.Click(simulateMove=False)
-# m.Click(simulateMove=False)
-
-
+    a = control.EditControl(AutomationId = 'study-accessNumber')
+    b = control.GroupControl(ClassName = 'ant-table-body')
+    auto.SetGlobalSearchTimeout(20)
 
 if True:
-    import keyboard
-    a = get_control_depth(control, 2)
-    b = get_control_name(a, 'DICOM节点导入')
-    b = get_control_id(b, 'PACSExplorerWindow')
-    c = get_control_depth(b, 2)
-    d = get_control_depth(c[3], 1)
-    e = get_control_name(d, '登记号', 1)
-    f = get_control_name(c, '查询', 0)
-    g = get_control_id(c, 'studyList_ListView', 0)
-    m = get_control_name(c, '导入检查')
+    res = []
+    for i in range(0,len(sl)):
+        sl_i = sl[i]
+        print(i, sl_i)
+        a.GetValuePattern().SetValue(sl_i)
+        c = get_control_depth(b, 4)
+        if len(c) < 9:
+            res.append('NA')
+        else:
+            res.append('1')
 
-i = 0
-for i in range(i, len(sl)):
-    zid = sl[i]
-    print(i, zid)
-    if not zid.strip():
-        continue
-    e.GetValuePattern().SetValue(zid)
-    # print(get_value(e))
-    while f.IsEnabled == 0:
-        f.Click(simulateMove=False)
-        # keyboard.press_and_release('esc')
-        keyboard.press_and_release('enter')
-        time.sleep(1)
-        e.GetValuePattern().SetValue(zid)
-    f.Click(simulateMove=False)
-    time.sleep(0.5)
-    h = get_control_name(g, 'UIH.Mcsf.Archiving.StudyViewModel')
-    if h:
-        n = get_control_depth(h, 1)
-        nn = get_value(n[2])
-        lastn = n[1].GetChildren()[0].Name
-        print(nn)
-        if not nn: break
-        n[2].Click(simulateMove=False)
-        m.Click(simulateMove=False)
-    h = get_control_name(g, 'UIH.Mcsf.Archiving.StudyViewModel')
-    if h:
-        n = get_control_depth(h, 1)[1]
-        nn = n.GetChildren()[0].Name
-        if nn == lastn:
-            keyboard.press_and_release('enter')
-            time.sleep(1)
+    pyperclip.copy('\n'.join(res))
+        

@@ -22,6 +22,7 @@ def ff_ptime(tstr):
     ffs = [
         '%Y/%m/%d %H:%M:%S',
         '%Y/%m/%d %H:%M',
+        '%Y/%m/%d',
         '%Y年%m月%d日'
     ]
     for fs in ffs:
@@ -36,23 +37,24 @@ for l in a:
     l = l.strip().split('\t')
     if len(l) < 4:
         continue
-    l[-2] = datetime.strptime(l[-2], '%Y/%m/%d %H:%M:%S')
+    l[-2] = ff_ptime(l[-2])
     if l[0] in zsid:
         zsid[l[0]].append((l[-2],l[-1]))
     else:
         zsid[l[0]] = [(l[-2],l[-1])]
-        
-res = []
-for l in b:
-    l = l.strip().split('\t')
-    l[-1] = ff_ptime(l[-1])
-    if l[0] not in zsid:
-        res.append('')
-        continue
-    tmp = [(abs(x[0] - l[-1]), x[0], x[1]) for x in zsid[l[0]]]
-    tmp.sort(key = lambda x:x[0])
-    # print(tmp)
-    res.append(tmp[0][2])
 
-pyperclip.copy('\n'.join(res))
+if True:
+    res = []
+    for l in b:
+        l = l.strip().split('\t')
+        l[-1] = ff_ptime(l[-1])
+        if l[0] not in zsid:
+            res.append('')
+            continue
+        tmp = [(abs(x[0] - l[-1]), x[0], x[1]) for x in zsid[l[0]]]
+        tmp.sort(key = lambda x:x[0])
+        # print(tmp)
+        res.append(tmp[0][2])
+
+    pyperclip.copy('\n'.join(res))
     
