@@ -37,6 +37,35 @@ if True:
     sl = sl.splitlines()
     print(sl[0], sl[-1])
 
+# subset
+if True:
+    res = set()
+    for zsid in sl:
+        tmp = zsid.split('\t')
+        zsid = tmp[0].strip().upper()
+        sst = datetime.strptime(tmp[-1], '%Y/%m/%d')
+
+        if zsid:
+            if zsid in zid:
+                data = zid[zsid]
+            else:
+                print(tmp, 'skip')
+                continue
+        else:
+            print(tmp, 'skip')
+            continue
+        tmp = [(abs(sst - x[0]), x[0], x[1]) for x in data]
+        tmp.sort(key = lambda x:x[0])
+        tmp = tmp[0]
+        if tmp[0].total_seconds() > 3600*24*5:
+            print(tmp, 'skip')
+            continue
+        res.add(tmp[2] + '\\')
+
+    pyperclip.copy('\r\n'.join(res))
+
+
+
 if True:
     out = input('输入out文件夹路径:')
     icis = set(x.split('\t')[0].strip().upper() for x in sl)
