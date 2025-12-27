@@ -30,6 +30,12 @@ if True:
                 print(_c.Name, _c.AutomationId)
                 return _c
 
+    def get_control_id(_cs, _n):
+        for _c in _cs:
+            if _c.AutomationId == _n:
+                print(_c.Name, _c.AutomationId)
+                return _c
+
     def get_value(_c):
         _t = _c.GetPattern(auto.PatternId.ValuePattern)
         if _t:
@@ -46,16 +52,20 @@ if True:
         return _c.GetLegacyIAccessiblePattern().Value
 
 if True:
-    a = get_control_depth(control, 4)
-    yjh = get_control_depth(a[5], 1)[0]
-    cx = get_control_name(a[12].GetChildren(), '查询')
+    a = get_control_depth(control, 3)
+    if len(a) < 13:
+        a = get_control_depth(a, 1)
+    yjh = get_control_id(a, 'panel2').GetChildren()[0]
+    cx = get_control_name(get_control_id(a, 'panel19').GetChildren(), '查询')
 
 if True:
     input('任意键粘贴ZSID...')
     sl = pyperclip.paste().strip()
     sl = sl.splitlines()[1:]
     print(sl[0], '\n', sl[-1])
-    a = get_control_depth(control, 3)
+    a = get_control_depth(control, 2)
+    if len(a) != 2:
+        a = get_control_depth(a, 1)
     auto.SetGlobalSearchTimeout(120)
 
 res = []

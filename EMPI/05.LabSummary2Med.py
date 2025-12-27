@@ -3,7 +3,7 @@ if True:
     import re
     ag_rg = re.compile(r'InstrID=([^&]+)&SampleNo=([^&]+)&SampleTime=([^ ]+) ')
     input('任意键粘贴LabSummary...')
-    nfs = pyperclip.paste().strip().splitlines()
+    nfs = pyperclip.paste().rstrip().splitlines()
     print(nfs[0], nfs[-1], sep='\n')
 
 res = []

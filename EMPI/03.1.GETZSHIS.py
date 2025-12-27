@@ -46,4 +46,14 @@ for i in range(len(res),len(eids)):
     # 获得记录
     cn = ['zs-his|' + x.split('|')[-2] for x in f if x.find('zs-his')>=0]
     res.append('|@|'.join(cn))
-pyperclip.copy('\n'.join(res))
+
+if True:
+    res2 = []
+    for x in res:
+        z = list()
+        for y in x.split('|@|'):
+            if y in z:
+                continue
+            z.append(y)
+        res2.append('|@|'.join(z)) 
+    pyperclip.copy('\n'.join(res2))
