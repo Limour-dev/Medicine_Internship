@@ -4,31 +4,32 @@ if True:
     from datetime import datetime
     pt1 = input('输入CVI_TSV路径:')
 
-    reg_zid = re.compile(r'([Zz]?[Ss]?\d+?)([（(].+?[）)])?\s*\.txt')
+    reg_zid = re.compile(r'ZS\d+', re.IGNORECASE)
     reg_sdt = re.compile(r'^[\t ]*Study Date\t(\d+/\d+/\d+)', re.MULTILINE)
 
     cvi = {}
-    for one in os.listdir(pt1):
-        zid = reg_zid.findall(one)[0][0].upper()
-        with open(os.path.join(pt1, one), 'r', encoding='GB18030') as rf:
-            data = rf.read()
-        dtn = reg_sdt.findall(data)[0]
-        dtn = datetime.strptime(dtn,'%m/%d/%Y')
-        if zid in cvi:
-            cvi[zid].append((dtn, data))
-            cvi[zid].sort(key=lambda x:x[0])
-        else:
-            cvi[zid] = [(dtn, data)]
+    for two in os.listdir(pt1):
+        two = os.path.join(pt1, two)
+        for one in os.listdir(two):
+            zid = reg_zid.findall(one)[0].upper()
+            with open(os.path.join(two, one), 'r', encoding='GB18030') as rf:
+                data = rf.read()
+            dtn = reg_sdt.findall(data)[0]
+            dtn = datetime.strptime(dtn,'%m/%d/%Y')
+            if zid in cvi:
+                cvi[zid].append((dtn, data))
+                cvi[zid].sort(key=lambda x:x[0])
+            else:
+                cvi[zid] = [(dtn, data)]
 
     re_v = re.compile(r'\r?\n\t*((?:Segment\s)?\d\d?)\t([^\t]+)\t*', re.MULTILINE + re.IGNORECASE)
     re_v2 = re.compile(r'^[\t ]*([^\t]+)\t+([^\t]+)\t*', re.MULTILINE)
     
 
-
 if True:
-    input('任意键粘贴ZSID...')
-    sl = pyperclip.paste()
-    sl = sl.splitlines()
+    input('任意键粘贴ZSID及时间...')
+    sl = pyperclip.paste().rstrip()
+    sl = sl.splitlines()[1:]
     print(sl[0], sl[-1])
 
 def mergebp(bps):
@@ -45,6 +46,19 @@ def mergebp(bps):
         res[i] = f'{tmp:.3f}'
     return res
 
+def get_zsid_dtn(_line, _dtnf='%Y/%m/%d'):
+    zid = _line.split('\t')
+    dtn = zid[-1]
+    zid = zid[0]
+    zid = zid.strip().upper()
+    dtn = datetime.strptime(dtn, _dtnf)
+    return zid, dtn
+
+def get_skip(_data, _sst, _dtni=0):
+    _tmp = [(abs(_sst - x[_dtni]), i) for i,x in enumerate(_data)]
+    _tmp.sort(key = lambda x:x[0])
+    return _tmp[0][1]
+
 raise(BaseException("手动模式"))
 
 # height weight HR
@@ -52,12 +66,9 @@ if True:
     re_hwh = re.compile(r'^[\t ]*(1\d\d\.?\d*)\t(\d\d\d?\.?\d*)\t\t?(\d\d\d?)\t*$', re.MULTILINE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
         print(zid, skip)
         nt1 = re_hwh.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
