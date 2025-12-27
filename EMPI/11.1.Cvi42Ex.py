@@ -54,14 +54,19 @@ def get_zsid_dtn(_line, _dtnf='%Y/%m/%d'):
     dtn = datetime.strptime(dtn, _dtnf)
     return zid, dtn
 
+day10 = abs(datetime.strptime('11','%d') - datetime.strptime('1','%d'))
+
 def get_skip(_data, _sst, _dtni=0):
     _tmp = [(abs(_sst - x[_dtni]), i) for i,x in enumerate(_data)]
     _tmp.sort(key = lambda x:x[0])
-    return _tmp[0][1]
+    if _tmp[0][0] < day10:
+        return _tmp[0][1]
+    else:
+        return -1
 
 raise(BaseException("手动模式"))
 
-# height weight HR
+# height	weight	HR
 if True:
     re_hwh = re.compile(r'^[\t ]*(1\d\d\.?\d*)\t(\d\d\d?\.?\d*)\t\t?(\d\d\d?)\t*$', re.MULTILINE)
     res = []
@@ -69,6 +74,9 @@ if True:
         zid,dtn = get_zsid_dtn(zid)
         data = cvi[zid]
         skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_hwh.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -80,17 +88,18 @@ if True:
     pyperclip.copy('\n'.join(res))
 
 # LV
+# EF	EDVi	ESVi	SVi	CI
 if True:
     re_lv = re.compile(r'^[\t ]*(?:(?:LV)|(?:Clinical Results LV)).*(?:\r?\n.*){5}(\r?\nEDV.*(?:\r?\n.*){20})', re.MULTILINE)
     oh = ['EF', 'EDV/BSA', 'ESV/BSA', 'SV/BSA', 'CI']
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_lv.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -105,17 +114,18 @@ if True:
     pyperclip.copy('\n'.join(res))
 
 # RV
+# EF	EDVi	ESVi	SVi	CI
 if True:
     re_rv = re.compile(r'^[\t ]*(?:(?:RV)|(?:Clinical Results RV)).*(?:\r?\n.*){4}(\r?\nEDV.*(?:\r?\n.*){14})', re.MULTILINE)
     oh = ['EF', 'EDV/BSA', 'ESV/BSA', 'SV/BSA', 'CI']
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_rv.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -130,16 +140,17 @@ if True:
     pyperclip.copy('\n'.join(res))
 
 # Myocardial Thickness
+# AHA-1	AHA-2	AHA-3	AHA-4	AHA-5	AHA-6	AHA-7	AHA-8	AHA-9	AHA-10	AHA-11	AHA-12	AHA-13	AHA-14	AHA-15	AHA-16
 if True:
     re_mt = re.compile(r'^[\t ]*SAX 3D LV.+AHA.*(?:\r?\n.*){10}((?:\r?\n.*){16})', re.MULTILINE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_mt.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -152,17 +163,18 @@ if True:
 
     pyperclip.copy('\n'.join(res))
 
-# Global Measurements Report	
+# Global Measurements Report
+# Basal	Mid	Apical	Global	Basal	Mid	Apical	Global	Basal	Mid	Apical	Global
 if True:
     re_gmr = re.compile(r'^[\t ]*Global Measurements Report.*(?:\r?\n.*){6}((?:\r?\n.*){8,}?)\s*?Left Ventricle', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_gmr.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -191,16 +203,17 @@ if True:
     pyperclip.copy('\n'.join(res))
 
 # nT1
+# AHA-1	AHA-2	AHA-3	AHA-4	AHA-5	AHA-6	AHA-7	AHA-8	AHA-9	AHA-10	AHA-11	AHA-12	AHA-13	AHA-14	AHA-15	AHA-16
 if True:
     re_nt1 = re.compile(r'^[\t ]*Regional\sNative\sT1\s\(AHA\sSegmentation\)\s*(?:\r?\n.*){2}((?:\r?\n.*){16})', re.MULTILINE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_nt1.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -218,12 +231,12 @@ if True:
     re_gnt1 = re.compile(r'^[\t ]*Native T1.*(?:\r?\n.*){10}\s*Global Myo T1 Across Slices\s*([^\t ]+)\s*±\s*([^\t ]+)', re.MULTILINE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_gnt1.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
