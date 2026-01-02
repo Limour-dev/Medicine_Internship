@@ -327,7 +327,11 @@ if True:
         if not nt1:
             res.append(dtn)
             continue
-        nt1 = mergebp(nt1)
+        try:
+            nt1 = mergebp(nt1)
+        except ValueError as error:
+            print(zid, error)
+            nt1 = ['NA']
         res.append('\t'.join([dtn, nt1[0]]))
 
     pyperclip.copy('\n'.join(res))
@@ -381,8 +385,37 @@ if True:
 
     pyperclip.copy('\n'.join(res))
 
-# Global-mean	Global-SD nT2
+# Global-mean	Global-SD nT2 fix
 if True:
+    re_gnt2 = re.compile(r'^[\t ]*Global\sMyocardial\sT2\sOffset.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
+    re_gnt2fix = re.compile(r'^[\t ]*Global\sMyocardial\sT2.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
+    res = []
+    for zid in sl:
+        zid,dtn = get_zsid_dtn(zid)
+        if zid not in cvi:
+            res.append('NA')
+            continue
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
+        print(zid, skip)
+        nt1 = re_gnt2.findall(data[skip][1])
+        if not nt1:
+            nt1 = re_gnt2fix.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1))
+        if not nt1:
+            res.append(dtn)
+            continue
+        ov = re_v.findall(nt1[0])
+        res.append('\t'.join([dtn] + [x[1] for x in ov]))
+
+    pyperclip.copy('\n'.join(res))
+
+# Global-mean	Global-SD nT2
+if False:
     re_gnt2 = re.compile(r'^[\t ]*Global\sMyocardial\sT2\sOffset.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
     re_gnt2fix = re.compile(r'^[\t ]*Global\sMyocardial\sT2.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
     res = []
@@ -549,32 +582,24 @@ if True:
 
     pyperclip.copy('\n'.join(res))
 
-
-# Global-mean	Global-SD nT2 fix
+# LGE3
 if True:
-    re_gnt2 = re.compile(r'^[\t ]*Global\sMyocardial\sT2\sOffset.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
-    re_gnt2fix = re.compile(r'^[\t ]*Global\sMyocardial\sT2.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
+    re_lge = re.compile(r'^\s*LGE\s*\r?\n\s*([\d,，]*)\s*$', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
         zid,dtn = get_zsid_dtn(zid)
-        if zid not in cvi:
-            res.append('NA')
-            continue
         data = cvi[zid]
         skip = get_skip(data, dtn)
         if skip < 0:
             res.append('NA')
             continue
         print(zid, skip)
-        nt1 = re_gnt2.findall(data[skip][1])
-        if not nt1:
-            nt1 = re_gnt2fix.findall(data[skip][1])
+        nt1 = re_lge.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
-        print(dtn, len(nt1))
+        print(dtn, len(nt1), nt1)
         if not nt1:
             res.append(dtn)
             continue
-        ov = re_v.findall(nt1[0])
-        res.append('\t'.join([dtn] + [x[1] for x in ov]))
+        res.append('\t'.join([dtn] + nt1))
 
     pyperclip.copy('\n'.join(res))
