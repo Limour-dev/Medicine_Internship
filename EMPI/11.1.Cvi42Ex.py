@@ -209,6 +209,9 @@ if True:
     res = []
     for zid in sl:
         zid,dtn = get_zsid_dtn(zid)
+        if zid not in cvi:
+            res.append('NA')
+            continue
         data = cvi[zid]
         skip = get_skip(data, dtn)
         if skip < 0:
@@ -232,6 +235,9 @@ if True:
     res = []
     for zid in sl:
         zid,dtn = get_zsid_dtn(zid)
+        if zid not in cvi:
+            res.append('NA')
+            continue
         data = cvi[zid]
         skip = get_skip(data, dtn)
         if skip < 0:
@@ -253,12 +259,15 @@ if True:
     re_pt1 = re.compile(r'^[\t ]*Regional\sCA\sT1\s\(AHA\sSegmentation\)\s*(?:\r?\n.*){2}((?:\r?\n.*){16})', re.MULTILINE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        if zid not in cvi:
+            res.append('NA')
+            continue
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_pt1.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -276,12 +285,15 @@ if True:
     re_nt1bp = re.compile(r'^[\t ]*Regional Native T1 Slice (\d\d?).*(?:\r?\n.*){102}\s*Blood Pool\s+([^\s]+)', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        if zid not in cvi:
+            res.append('NA')
+            continue
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_nt1bp.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -299,12 +311,15 @@ if True:
     re_pt1bp = re.compile(r'^[\t ]*Regional CA T1 Slice (\d\d?).*(?:\r?\n.*){102}\s*Blood Pool\s+([^\s]+)', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        if zid not in cvi:
+            res.append('NA')
+            continue
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_pt1bp.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -322,12 +337,12 @@ if True:
     re_pt1 = re.compile(r'^[\t ]*Regional\sECV\s\(AHA\sSegmentation\)\s*(?:\r?\n.*){2}((?:\r?\n.*){16})', re.MULTILINE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_pt1.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -345,12 +360,15 @@ if True:
     re_nt2 = re.compile(r'^[\t ]*Regional\sT2\s\(AHA\sSegmentation\)\s*(?:\r?\n.*){2}((?:\r?\n.*){16})', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        if zid not in cvi:
+            res.append('NA')
+            continue
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_nt2.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -369,12 +387,12 @@ if True:
     re_gnt2fix = re.compile(r'^[\t ]*Global\sMyocardial\sT2.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_gnt2.findall(data[skip][1])
         if not nt1:
@@ -401,12 +419,12 @@ if True:
     re_qprmt = re.compile(r'^[\t ]*\"Rest \(MBF, ml/g/min\)\"\s*(?:\r?\n)LAD.+?([\d.]+)\s*(?:\r?\n)RCA.+?([\d.]+)\s*(?:\r?\n)LCx.+?([\d.]+)', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_qprmt.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -423,12 +441,12 @@ if True:
     re_qprm = re.compile(r'^[\t ]*\"Rest \(MBF, ml/g/min\)\"\s*(?:\r?\n.*){3}((?:\r?\n.*){16})', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_qprm.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -446,12 +464,12 @@ if True:
     re_qprrmt = re.compile(r'^[\t ]*Rest \(rMBF\)\s*(?:\r?\n)LAD.+?([\d.]+)\s*(?:\r?\n)RCA.+?([\d.]+)\s*(?:\r?\n)LCx.+?([\d.]+)', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_qprrmt.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -468,12 +486,12 @@ if True:
     re_qprrm = re.compile(r'^[\t ]*Rest \(rMBF\)\s*(?:\r?\n.*){3}((?:\r?\n.*){16})', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_qprrm.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -492,12 +510,12 @@ if True:
     re_lge = re.compile(r'^[\t ]*\"?((?:[1234] *,? *)+)\"?\t*(?:\r?\n\t{5,})*\r?\n\t?Myocardial Volume:.*?(?:\r?\n.*){6}\r?\n\t?([^\t]+?)g', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_lge.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -514,12 +532,12 @@ if True:
     re_lge = re.compile(r'Myocardial Volume:.*?(?:\r?\n.*){6}\r?\n\t?([^\t]+?)g', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_lge.findall(data[skip][1])
         dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
@@ -538,12 +556,15 @@ if True:
     re_gnt2fix = re.compile(r'^[\t ]*Global\sMyocardial\sT2.*?(?:\r?\n.*){1}((?:\r?\n.*)+?)\r?\n\t{5,}', re.MULTILINE + re.IGNORECASE)
     res = []
     for zid in sl:
-        zid = zid.strip().upper()
-        if zid:
-            skip = 0
-            data = cvi[zid]
-        else:
-            skip += 1
+        zid,dtn = get_zsid_dtn(zid)
+        if zid not in cvi:
+            res.append('NA')
+            continue
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
         print(zid, skip)
         nt1 = re_gnt2.findall(data[skip][1])
         if not nt1:

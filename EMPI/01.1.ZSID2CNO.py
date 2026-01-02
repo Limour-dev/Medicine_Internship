@@ -97,9 +97,12 @@ try:
                     v = get_value(x)
                     v = clear_value(v)
                     items.append((x.Name, v))
-                    print(items[-1])
+                    # print(items[-1])
+                print(items[16:18])
                 tmp = '\t'.join(x[1] for x in items)
                 res_i.append(tmp)
+                if len(items[16][-1]) > 8:
+                    break
         res.append(res_i)
 finally:
     print(sl_i)
