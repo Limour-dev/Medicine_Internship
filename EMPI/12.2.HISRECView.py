@@ -66,14 +66,15 @@ def hrmTb(bsoj):
     return bsoj
 
 skipiPd = False
-skipoPd = True
+skipoPd = False
 skipPis = False
 
 reg_risr = re.compile(r'(心超)|(心脏)|(冠状动脉)', re.IGNORECASE)
 skiprisr = True
 
-for num in range(210,len(zs)):
-    zid = zs[num]
+for zsi_i in range(11,len(zs)):
+    zid = zs[zsi_i]
+    num, zid = zid.split('\t')
     pth1 = os.path.join(pts, zid)
     print(pth1)
     if not os.path.exists(pth1):
@@ -82,7 +83,11 @@ for num in range(210,len(zs)):
     res = []
 
     pth2 = os.path.join(pth1, 'ris')
-    pth3s = os.listdir(pth2)
+    try:
+        pth3s = os.listdir(pth2)
+    except Exception as error:
+        print(error)
+        pth3s = []
     for pth3 in pth3s:
         nmbfuck = pth3.split('_')
         pth3 = os.path.join(pth2, pth3)
@@ -113,7 +118,11 @@ for num in range(210,len(zs)):
 
     if not skipiPd:
         pth2 = os.path.join(pth1, 'ipd')
-        pth3s = os.listdir(pth2)
+        try:
+            pth3s = os.listdir(pth2)
+        except Exception as error:
+            print(error)
+            pth3s = []
         for pth3 in pth3s:
             pth3 = os.path.join(pth2, pth3)
             print(pth3)
@@ -135,7 +144,11 @@ for num in range(210,len(zs)):
                 res.append(HisRec(onet, onen, oner))
     if not skipoPd:
         pth2 = os.path.join(pth1, 'opd')
-        pth3s = os.listdir(pth2)
+        try:
+            pth3s = os.listdir(pth2)
+        except Exception as error:
+            print(error)
+            pth3s = []
         for pth3 in pth3s:
             pth3 = os.path.join(pth2, pth3)
             print(pth3)
@@ -210,7 +223,7 @@ for num in range(210,len(zs)):
             res.append(HisRec(onet, onen, oner))
     
     res.sort(key=lambda x:x.time)
-    pth1 = os.path.join(pto, f'{num:03}_{zid}.txt')
+    pth1 = os.path.join(pto, f'{int(num):03}_{zid}.txt')
     print(pth1)
     with open(pth1, 'w', encoding='utf-8') as wf:
         for r in res:
