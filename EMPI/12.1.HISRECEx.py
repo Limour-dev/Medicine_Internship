@@ -11,10 +11,14 @@ if True:
     zs = pyperclip.paste().strip().splitlines()
     print(len(zs), zs[0], zs[-1], sep='\n')
 
-if True:
-    reg_hbp_dm = re.compile(r'(?:(?:【既往史】\s*(?:疾病史：)?)|(?:疾病史：))\s*(.+?)\s*(?:(?:手术史外伤史：)|(?:传染病史：))', re.DOTALL)
     res = []
-    for zid in zs:
+
+if True:
+    if len(res):
+        res = res[:-1]
+    reg_hbp_dm = re.compile(r'(?:(?:【既往史】\s*(?:疾病史：)?)|(?:疾病史：))\s*(.+?)\s*(?:(?:手术史外伤史：)|(?:传染病史：)|(?:【个人史】))', re.DOTALL)
+    for zidi in range(len(res), len(zs)):
+        zid = zs[zidi]
         pth = os.path.join('GETHSREC', zid, 'ipd')
         if not os.path.exists(pth):
             res.append('NA\tNA')
@@ -31,7 +35,7 @@ if True:
                 continue
             for one in data:
                 if one['sectionName'].strip().startswith('入院记录') or one['sectionName'] in {
-                        '24小时入出院记录',
+                        '24小时入出院记录', '入观记录'
                     }:
                     data = one
                     break
@@ -76,10 +80,10 @@ if True:
         res = ''
         with httpx.stream("POST", url, headers=headers, json=data, timeout=_timeout) as r:
             for line in r.iter_lines():
+                # print(True, line)
                 if line.endswith('[DONE]'):
                     continue
                 if line.startswith("data:"):
-                    # print(True, line)
                     data = json.loads(line[5:])['choices']
                     if data:
                         data = data[0]
@@ -96,7 +100,7 @@ if True:
 rres = []
 if True:
     data = {
-        'model': "gpt-4.1",
+        'model': "claude",
         'messages': [
             {'role': 'system', 'content': "判断目前是否有高血压和糖尿病，按示例格式输出，不做解释"},
             {'role': 'user', 'content': "2024-11-01|高血压病史：血压最高达150/90mmHg，平日不规律服用药物降压，血压控制欠佳。否认糖尿病史。"},
@@ -109,7 +113,7 @@ if True:
     for i in range(len(rres), len(res)):
         one = res[i]
         print(one)
-        if not one.strip():
+        if (not one.strip()) or (one == 'NA\tNA'):
             rres.append('')
             continue
         data['messages'][-1]['content'] = one
