@@ -20,6 +20,21 @@ if True:
             else:
                 zid[z] = [[t,pth2]]
 
+def ff_ptime(tstr):
+    ffs = [
+        '%Y/%m/%d %H:%M:%S',
+        '%Y/%m/%d %H:%M',
+        '%Y/%m/%d',
+        '%Y年%m月%d日'
+    ]
+    tstr = tstr.split(' 星期', maxsplit=1)[0]
+    for fs in ffs:
+        try:
+            return datetime.strptime(tstr, fs)
+        except ValueError:
+            continue
+    raise ValueError('ffs')
+
 if True:
     h = (input('任意键粘贴ZSID和时间...').strip().upper() == 'H')
     sl = pyperclip.paste()
@@ -30,7 +45,7 @@ if True:
         tmp = zsid.split('\t')
         zsid = tmp[0].strip().upper()
         tmp = tmp[-1].split(' ', maxsplit=1)[0]
-        sst = datetime.strptime(tmp, '%Y-%m-%d')
+        sst = ff_ptime(tmp)
         slt.append((zsid, sst))
 
 if True:
