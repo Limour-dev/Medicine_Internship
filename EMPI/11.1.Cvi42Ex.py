@@ -584,7 +584,29 @@ if True:
 
 # LGE3
 if True:
-    re_lge = re.compile(r'^\s*LGE\s*\r?\n\s*([\d,，]*)\s*$', re.MULTILINE + re.IGNORECASE)
+    re_lge = re.compile(r'^\s*LGE\s*\r?\n\s*"?([\d,，]*)"?\s*$', re.MULTILINE + re.IGNORECASE)
+    res = []
+    for zid in sl:
+        zid,dtn = get_zsid_dtn(zid)
+        data = cvi[zid]
+        skip = get_skip(data, dtn)
+        if skip < 0:
+            res.append('NA')
+            continue
+        print(zid, skip)
+        nt1 = re_lge.findall(data[skip][1])
+        dtn = datetime.strftime(data[skip][0],'%Y/%m/%d')
+        print(dtn, len(nt1), nt1)
+        if not nt1:
+            res.append(dtn)
+            continue
+        res.append('\t'.join([dtn] + nt1))
+
+    pyperclip.copy('\n'.join(res))
+
+# LGE4
+if True:
+    re_lge = re.compile(r'\n\s*([\d,，]*)[\s\r\n]*$')
     res = []
     for zid in sl:
         zid,dtn = get_zsid_dtn(zid)
