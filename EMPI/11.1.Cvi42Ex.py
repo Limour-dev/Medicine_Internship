@@ -12,8 +12,8 @@ if True:
         two = os.path.join(pt1, two)
         for one in os.listdir(two):
             zid = reg_zid.findall(one)[0].upper()
-            with open(os.path.join(two, one), 'r', encoding='GB18030') as rf:
-                data = rf.read()
+            with open(os.path.join(two, one), 'rb') as rf:
+                data = rf.read().decode(encoding='GB18030', errors='ignore').replace('\r\n', '\n')
             dtn = reg_sdt.findall(data)[0]
             dtn = datetime.strptime(dtn,'%m/%d/%Y')
             if zid in cvi:
@@ -25,6 +25,8 @@ if True:
     re_v = re.compile(r'\r?\n\t*((?:Segment\s)?\d\d?)\t([^\t]+)\t*', re.MULTILINE + re.IGNORECASE)
     re_v2 = re.compile(r'^[\t ]*([^\t]+)\t+([^\t]+)\t*', re.MULTILINE)
     
+    ck_time = False
+    ck_reg = re.compile(r'^[^\t]*\t', re.M)
 
 if True:
     input('任意键粘贴ZSID及时间...')
@@ -68,7 +70,7 @@ raise(BaseException("手动模式"))
 
 # height	weight	HR
 if True:
-    re_hwh = re.compile(r'^[\t ]*(1\d\d\.?\d*)\t(\d\d\d?\.?\d*)\t\t?(\d\d\d?)\t*$', re.MULTILINE)
+    re_hwh = re.compile(r'^[\t ]*(1\d\d\.?\d*|无身高)\t(\d\d\d?\.?\d*)\t\t?(\d\d\d?)\t*$', re.MULTILINE)
     res = []
     for zid in sl:
         zid,dtn = get_zsid_dtn(zid)
@@ -85,7 +87,10 @@ if True:
             res.append(dtn)
             continue
         res.append('\t'.join([dtn] + list(nt1[0])))
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # LV
 # EF	EDVi	ESVi	SVi	CI
@@ -111,7 +116,10 @@ if True:
         ov = {k.strip():v for k,v in ov}
         res.append('\t'.join([dtn] + list(ov.get(x, 'NA') for x in oh)))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # RV
 # EF	EDVi	ESVi	SVi	CI
@@ -137,7 +145,10 @@ if True:
         ov = {k.strip():v for k,v in ov}
         res.append('\t'.join([dtn] + list(ov.get(x, 'NA') for x in oh)))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # Myocardial Thickness
 # AHA-1	AHA-2	AHA-3	AHA-4	AHA-5	AHA-6	AHA-7	AHA-8	AHA-9	AHA-10	AHA-11	AHA-12	AHA-13	AHA-14	AHA-15	AHA-16
@@ -161,7 +172,10 @@ if True:
         ov = re_v.findall(nt1[0])
         res.append('\t'.join([dtn] + list(x[1] for x in ov)))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # Global Measurements Report
 # Basal	Mid	Apical	Global	Basal	Mid	Apical	Global	Basal	Mid	Apical	Global
@@ -200,7 +214,10 @@ if True:
             tmp.append(line[4])
         res.append('\t'.join([dtn] + tmp))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # nT1
 # AHA-1	AHA-2	AHA-3	AHA-4	AHA-5	AHA-6	AHA-7	AHA-8	AHA-9	AHA-10	AHA-11	AHA-12	AHA-13	AHA-14	AHA-15	AHA-16
@@ -227,7 +244,10 @@ if True:
         ov = re_v.findall(nt1[0])
         res.append('\t'.join([dtn] + list(x[1] for x in ov)))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # Global-mean	Global-SD nT1
 if True:
@@ -252,7 +272,10 @@ if True:
             continue
         res.append('\t'.join([dtn] + list(nt1[0])))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # pT1
 if True:
@@ -304,7 +327,10 @@ if True:
         nt1 = mergebp(nt1)
         res.append('\t'.join([dtn, nt1[0]]))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # pT1 Blood Pool
 if True:
@@ -334,7 +360,11 @@ if True:
             nt1 = ['NA']
         res.append('\t'.join([dtn, nt1[0]]))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
+
 
 # ECV
 if True:
@@ -383,7 +413,10 @@ if True:
         ov = re_v.findall(nt1[0])
         res.append('\t'.join([dtn] + list(x[1] for x in ov)))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # Global-mean	Global-SD nT2 fix
 if True:
@@ -467,7 +500,10 @@ if True:
             continue
         res.append('\t'.join([dtn] + list(nt1[0])))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # Rest (MBF, ml/g/min)
 if True:
@@ -490,7 +526,10 @@ if True:
         ov = re_v.findall(nt1[0])
         res.append('\t'.join([dtn] + list(x[1] for x in ov)))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # Rest rMBF Territory
 if True:
@@ -512,7 +551,10 @@ if True:
             continue
         res.append('\t'.join([dtn] + list(nt1[0])))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 # Rest rMBF 
 if True:
@@ -535,7 +577,10 @@ if True:
         ov = re_v.findall(nt1[0])
         res.append('\t'.join([dtn] + list(x[1] for x in ov)))
 
-    pyperclip.copy('\n'.join(res))
+    ck_s = '\n'.join(res)
+    if not ck_time:
+        ck_s = ck_reg.sub('', ck_s)
+    pyperclip.copy(ck_s)
 
 
 # LGE
