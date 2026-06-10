@@ -2,7 +2,8 @@ import os
 import pandas as pd
 import h5py
 import numpy as np
-pth = r'D:\DTI\results1214'
+pth = r'D:\DTI\cardiac_DTI_pipelineV5\source_code\nii_file'
+
 for pth1 in os.listdir(pth):
     print(pth1)
     pth1 = os.path.join(pth, pth1, 'Python_post_processing')
@@ -121,3 +122,26 @@ for pth1 in os.listdir(pth):
     snr.append(len(rm_post['to_be_removed']))
     with open(pth_rm_pre, 'w') as wf:
         wf.write('\t'.join(str(x) for x in snr))
+        
+        
+for pth1 in os.listdir(pth):
+    print(pth1)
+    pth1 = os.path.join(pth, pth1, 'Python_post_processing')
+    pth_rm_pre = os.path.join(pth1, 'session', 'image_manual_removal_pre.zip')
+    pth_rm_post = os.path.join(pth1, 'session', 'image_manual_removal_post.zip')
+    pth_rm_id = os.path.join(pth1, 'results', 'numpy results', 'pth_rm_id.tsv')
+    rm_pre = pd.read_pickle(pth_rm_pre)
+    rm_post = pd.read_pickle(pth_rm_post)
+    
+    pre_flag = rm_pre['to_be_removed'].astype('boolean')
+    post_flag = rm_post['to_be_removed'].astype('boolean')
+    
+    df_out = pd.DataFrame(index=rm_pre.index)
+    
+    df_out['rm_pre'] = pre_flag.astype('Int64')   # True→1 False→0 NA→<NA>
+    
+    df_out['rm_post'] = post_flag.reindex(rm_pre.index).astype('Int64')
+    
+    df_out.insert(0, 'img_id', df_out.index)
+    
+    df_out.to_csv(pth_rm_id, sep='\t', index=False, na_rep='NA')
