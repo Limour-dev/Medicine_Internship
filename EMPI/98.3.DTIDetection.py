@@ -274,3 +274,37 @@ if True:
             gline.extend(rf.read().strip().split('\t'))
         res.append('\t'.join(gline))
     pyperclip.copy('\n'.join(res))
+
+# DTI rm_image_id
+if True:
+    res = []
+    for zsid in sl:
+        tmp = zsid.split('\t')
+        zsid = tmp[0].strip().upper()
+        sst = datetime.strptime(tmp[-1], '%Y/%m/%d')
+        if zsid:
+            if zsid in zid:
+                data = zid[zsid]
+            else:
+                res.append('NA\tNA')
+                continue
+        else:
+            if res[-1].startswith('NA'):
+                res.append('NA\tNA')
+                continue
+        tmp = [(abs(sst - x[0]), x[0], x[1]) for x in data]
+        tmp.sort(key = lambda x:x[0])
+        tmp = tmp[0]
+        if tmp[0].total_seconds() > 3600*24*5:
+            res.append(datetime.strftime(tmp[1],'%Y/%m/%d') + '\tNA')
+            continue
+        row_tips = zsid + '\t' + datetime.strftime(tmp[1],'%Y/%m/%d') + '\t'
+        pth = os.path.join(tmp[-1], 'Python_post_processing', 'results', 'numpy results', 'pth_rm_id.tsv')
+        with open(pth, 'r', encoding='utf-8') as rf:
+            next(rf)
+            gline = [row_tips + oline.strip() for oline in rf]
+        res.extend(gline)
+    pyperclip.copy('\n'.join(res))
+            
+        
+        
