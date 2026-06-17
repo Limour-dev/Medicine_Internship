@@ -20,20 +20,20 @@ if True:
             else:
                 zid[z] = [[t,pth2]]
 
-def ff_ptime(tstr):
-    ffs = [
-        '%Y/%m/%d %H:%M:%S',
-        '%Y/%m/%d %H:%M',
-        '%Y/%m/%d',
-        '%Y年%m月%d日'
-    ]
-    tstr = tstr.split(' 星期', maxsplit=1)[0]
-    for fs in ffs:
-        try:
-            return datetime.strptime(tstr, fs)
-        except ValueError:
-            continue
-    raise ValueError('ffs')
+    def ff_ptime(tstr):
+        ffs = [
+            '%Y/%m/%d %H:%M:%S',
+            '%Y/%m/%d %H:%M',
+            '%Y/%m/%d',
+            '%Y年%m月%d日'
+        ]
+        tstr = tstr.split(' 星期', maxsplit=1)[0]
+        for fs in ffs:
+            try:
+                return datetime.strptime(tstr, fs)
+            except ValueError:
+                continue
+        raise ValueError('ffs')
 
 if True:
     h = (input('任意键粘贴ZSID和时间...').strip().upper() == 'H')
@@ -44,6 +44,9 @@ if True:
     for zsid in sl:
         tmp = zsid.split('\t')
         zsid = tmp[0].strip().upper()
+        if not zsid:
+            slt.append((None, None))
+            continue
         tmp = tmp[-1].split(' ', maxsplit=1)[0]
         sst = ff_ptime(tmp)
         slt.append((zsid, sst))
@@ -91,6 +94,9 @@ for pth in os.listdir(out):
 if True:
     res = []
     for zsid,sst in slt:
+        if not zsid:
+            res.append('NA\tNA')
+            continue
         if zsid:
             if zsid in zid:
                 data = zid[zsid]
