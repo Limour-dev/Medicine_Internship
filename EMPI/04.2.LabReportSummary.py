@@ -29,8 +29,8 @@ try:
             print(co)
             lb = httpx.get(url + co[7:], timeout=_t)
             lb_s = BeautifulSoup(lb, "html.parser")
-            lbs = lb_s.select_one('#tblLabContent').select('tr')
-            lbs = lbs[1:-2]
+            lbs = lb_s.select_one('#tblBYLabContent').select('tr')
+            lbs = lbs[1:-3]
             if len(lbs) == 1 and lbs[0].getText().find('暂无检验报告') >= 0:
                 continue
             for opc in lbs:
