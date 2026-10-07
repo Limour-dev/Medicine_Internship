@@ -26,8 +26,6 @@ if True:
         return x[2]
     zs2lb = {}
 
-usr = input('账号信息：')
-
 headers = {
     "Cookie": input('输入Cookie: ')
 }
@@ -35,29 +33,28 @@ headers = {
 res = []
 for i in range(len(res), len(zs)):
     ks = zs[i].split('|@|')
+    ks = [x[7:] for x in ks if x.startswith('zs')]
     for k in ks:
-        if k.startswith('zs'):
-            print(i+1, k)
-            break
+        o_data = {"vid":k,"vidType":"01"}
+
+        a = httpx.post(
+                url, headers=headers,
+                json = o_data,
+                timeout = _t
+            )
+
+        r = a.json()
+        try:
+            pid = r['data']['pid']
+        except:
+            continue
+        name = r['data']['name'].strip()
+        print(i+1, k)
+        res.append(f'{pid}\t{name}')
+        break
     else:
         print(i+1, k, 'skip')
+        res.append('skip')
         continue
-    k = k[7:]
-
-    o_data = {"vid":k,"vidType":"02","appId":"EMR","user": usr}
-    
-    a = httpx.post(
-            url, headers=headers,
-            json = o_data,
-            timeout = _t
-        )
-
-    r = a.json()
-    
-    pid = r['data']['pid']
-
-    name = r['data']['name'].strip()
-
-    res.append(f'{pid}\t{name}')
 
 pyperclip.copy('\n'.join(res))
